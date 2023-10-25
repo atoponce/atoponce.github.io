@@ -1,0 +1,126 @@
+<!doctype html>
+<!-- Originaly written by Aaron Toponce https://github.com/atoponce/nodepassgen -->
+<!-- Minimized, i.e. edited down to just the bare bones needed to create good passwords by H Johnson -->
+<!-- Made fully HTML5 compliant by Aaron Toponce, cleaned up some HTML -->
+
+<!-- Installation:
+  a) Locate this file on your hard disk.
+  b) Browse to it with a url like file:///path/to/mightytiny.html
+  c) Book mark it so it's easy to run again.
+-->
+
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>MightyTiny Password Generator - v0.2</title>
+  </head>
+  <body>
+    <h2>MightyTiny Password Generator</h2>
+    <hr>
+    <p>Don't let the primitive look of this gadget fool you. Fancy screen formatting was deliberately left out of this version.</p>
+    <p>This is built simple, so it's inner workings can be easily inspected.  With minimal technical skill, one can easily look inside and see exactly how it works.</p>
+    <p>Open-source code + Simplicity = Trustworthness.</p>
+    <p>The calculations are done inside your web browser and never touch the internet, not until you hand copy your new generated password to it's target web page.</p>
+    <p><strong>Be safe:</strong> Use a different password everywhere you go. Use passwords with at least 70 bits of entropy.</p>
+    <hr>
+    <strong>1) Select minimum entropy:</strong>
+    <input onclick="generateRandom()" name="entropy" type="radio" value="55"         >55-bits
+    <input onclick="generateRandom()" name="entropy" type="radio" value="60"         >60-bits
+    <input onclick="generateRandom()" name="entropy" type="radio" value="65"         >65-bits
+    <input onclick="generateRandom()" name="entropy" type="radio" value="70" checked >70-bits
+    <input onclick="generateRandom()" name="entropy" type="radio" value="75"         >75-bits
+    <input onclick="generateRandom()" name="entropy" type="radio" value="80"         >80-bits
+    <input onclick="generateRandom()" name="entropy" type="radio" value="128"        >128-bits
+    <p><small><i>(More bits = more security. 70-bits is the recommended minimum. 128-bits for password-based encryption.)</i></small></p>
+    <strong>2) Select an output format:</strong>
+    <select id="base-options">
+      <option onclick="generateRandom()">Base-94</option>
+      <option onclick="generateRandom()">Base-85</option>
+      <option onclick="generateRandom()">Base-64</option>
+      <option onclick="generateRandom()">Base-62</option>
+      <option onclick="generateRandom()">Base-58</option>
+      <option onclick="generateRandom()">Base-52</option>
+      <option onclick="generateRandom()">Base-45</option>
+      <option onclick="generateRandom()">Base-36</option>
+      <option onclick="generateRandom()">Base-32</option>
+      <option onclick="generateRandom()">Base-26</option>
+      <option onclick="generateRandom()">Base-16</option>
+      <option onclick="generateRandom()">Base-10</option>
+      <option onclick="generateRandom()">Base-8 </option>
+      <option onclick="generateRandom()">Base-4 </option>
+      <option onclick="generateRandom()">Base-2 </option>
+    </select>
+    <p><small>(All output formats deliver aproximately the same password strength.)</small></p>
+    <strong>3)</strong>
+    <button onclick="generateRandom()" value="Generate">Click here to generate a new password</button>
+    <p><strong>4) Your new password is:</strong></p>
+    <p><span id="random-pass" class="password"></span></p>
+    <p><small>(<span id="random-length" ></span> characters wide, <span id="random-entropy"></span> bits of entropy)</small></p>
+    <p><strong>5) Once you copy your password, close this page.</strong></p>
+    <script>
+      // Formatting breaks linting convention, but is preserved for layman readability.
+      function getEntropy () {
+        return parseInt(document.querySelector('input[name="entropy"]:checked').value)
+      }
+
+      /* Uniform, unbiased, secure, random number generator */
+      function secRand (count) {
+        const min = 2**16 % count
+        const rand = new Uint16Array(1)
+
+        do { crypto.getRandomValues(rand) } while (rand[0] < min)
+
+        return rand[0] % count
+      }
+
+      function generatePass (len, set) {
+        let pass = ''
+        let passArr = ''
+
+        if (typeof set === 'string') { passArr = set.split('') }
+        else                         { passArr = set }
+
+        for (let i = len; i > 0; i--){ pass   += passArr[secRand(set.length)]}
+
+        return pass.trim()
+      }
+
+      function generateRandom () {
+        let s = ''
+        const entropy     = getEntropy()
+        const passId      = document.getElementById('random-pass')
+        const passLength  = document.getElementById('random-length')
+        const passEntropy = document.getElementById('random-entropy')
+        const option      = document.getElementById('base-options').value
+
+             if (option === 'Base-94') {for (let i = 0; i < 94; i++) { s += String.fromCharCode(33 + i) }}
+	else if (option === 'Base-85') {s = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()*+-;<=>?@^_`{|}~'}
+	else if (option === 'Base-64') {s = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ`!"#$%&\'()*+,-./:;<=>?@[\\]^_'}
+	else if (option === 'Base-62') {s = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'}
+	else if (option === 'Base-58') {s =  '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'}
+	else if (option === 'Base-52') {s =           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'}
+	else if (option === 'Base-45') {s = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_$%*+-./:'}
+	else if (option === 'Base-36') {s = '0123456789abcdefghijklmnopqrstuvwxyz'}
+	else if (option === 'Base-32') {s = '0123456789abcdefghjkmnpqrstvwxyz'}
+	else if (option === 'Base-26') {s =           'abcdefghijklmnopqrstuvwxyz'}
+	else if (option === 'Base-16') {s = '0123456789abcdef'}
+	else if (option === 'Base-10') {s = '0123456789'}
+	else if (option === 'Base-8' ) {s = '01234567'}
+	else if (option === 'Base-4' ) {s = 'ACGT'}
+	else if (option === 'Base-2' ) {s = '01'}
+
+        const len = Math.ceil(entropy / Math.log2(s.length))
+        const pass = generatePass(len, s)
+
+        //Set values in html
+             passId.innerText = pass
+         passLength.innerHTML = len
+        passEntropy.innerHTML = Math.floor(len * Math.log2(s.length))
+      }
+
+      window.onload = function () {
+        generateRandom()
+      }
+    </script>
+  </body>
+</html>

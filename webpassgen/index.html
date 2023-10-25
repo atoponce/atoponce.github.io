@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang='en'>
+  <head>
+    <link rel='shortcut icon' href='favicon.ico'>
+    <link rel='stylesheet' href='assets/style.css'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <meta name='color-scheme' content='dark light'>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+    <title>Passphrase and Password Generator</title>
+  </head>
+  <body>
+    <div id='container'>
+      <div id='header'>
+        <h1>Passphrase & Password Generator</h1>
+        <h4>Exploring what password generation could look like. This generator doesn't suck.</h4>
+        <p style="font-size: small;"></p>
+        <ul id='navigation'>
+          <li><a href='index.html'>Passwords</a></li>
+          <li><a href='entropy.html'>Entropy</a></li>
+          <li><a href='bookmarklets.html'>Bookmarklets</a></li>
+          <li>
+            <a href='javascript:void(0)' onclick='toggleTheme(); loadPasses();' id='theme_switcher' title='Change theme'>
+              <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='currentColor' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-moon'>
+                <path d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'></path>
+              </svg>
+            </a>
+          </li>
+        </ul>
+        <div id='password-strength'>
+          <input id='input' type='range' min='48' max='128' step='8' value='72' oninput='updateSlider(parseInt(value)); loadPasses();'>
+          <span>Password strength: </span>
+          <output id='output' for=value>72</output>
+          <span> bits</span>
+        </div>
+      </div>
+      <div id='content'>
+
+        <div id='alt-default' class='cell'>
+          <span class='cell-title'><strong>Alternate</strong></span>
+          <div class='optional'>
+            <select id='alt-options'>
+              <optgroup label='English'>
+                <option>Acronyms</option>
+                <option selected='selected'>Common Words Only</option>
+                <option>Every Word List</option>
+                <option disabled>――――――――――</option>
+                <option>Colors</option>
+                <option>Deseret Alphabet</option>
+                <option>Lord of the Rings</option>
+                <option>Obscure</option>
+                <option>PGP</option>
+                <option>Pokerware</option>
+                <option>RockYou</option>
+                <option>Shavian Alphabet</option>
+                <option>Simpsons</option>
+                <option>S/KEY</option>
+                <option>Trump</option>
+                <option>Verb, Adjective, Noun</option>
+                <option>Wordle</option>
+              </optgroup>
+              <optgroup label='Non-English'>
+                <option>Afrikaans</option>
+                <option>Belarusian</option>
+                <option>Croatian</option>
+                <option>Elvish</option>
+                <option>Klingon</option>
+                <option>Mongolian</option>
+                <option>Serbian</option>
+                <option>Ukranian</option>
+              </optgroup>
+            </select>
+          </div>
+          <button class='pass-button' value='Generate' onclick='generatePassphrase("alternate");'>Generate</button>
+          <div id='alt-pass' class='password'></div>
+          <div class='use-entropy'>
+            <input type='checkbox' id='alt-entropy-check' name='entropy-check' value='alt-ntropy'>
+            <label for='alt-entropy-check'> Add entropy?</label>
+            <span></span> samples left.
+          </div>
+          <div class='stats'>
+            <span><a href='javascript:void(0)' onclick='toggleStats("alternate")'>Passphrase Statistics</a></span>
+          </div>
+          <div class='checksum'><span id='alt-check'></span></div>
+          <div id='alt-overlay' class='statistics'>
+            <dl>
+              <dt>Length:</dt><dd id='alt-length'></dd>
+              <dt>Security:</dt><dd id='alt-entropy'></dd>
+              <dt>Set size:</dt><dd id='alt-set-size'></dd>
+            </dl>
+            <span class="cell_overlay">
+              <a href='javascript:void(0)' onclick='toggleStats("alternate")'>Click here to dismiss</a>
+            </span>
+          </div>
+        </div>
+
+        <div id='crypto-default' class='cell'>
+          <span class='cell-title'><strong>Cryptocurrency</strong></span>
+          <div class='optional'>
+            <select id='cryptocurrency-options'>
+              <optgroup label='Bitcoin'>
+                <option>Chinese (Simp)</option>
+                <option>Chinese (Trad)</option>
+                <option>Czech</option>
+                <option selected='selected'>English</option>
+                <option>French</option>
+                <option>Italian</option>
+                <option>Japanese</option>
+                <option>Korean</option>
+                <option>Portuguese</option>
+                <option>Spanish</option>
+              </optgroup>
+              <optgroup label='Monero'>
+                <option>Chinese</option>
+                <option>Dutch</option>
+                <option>English</option>
+                <option>Esperanto</option>
+                <option>French</option>
+                <option>German</option>
+                <option>Italian</option>
+                <option>Japanese</option>
+                <option>Lojban</option>
+                <option>Portuguese</option>
+                <option>Russian</option>
+                <option>Spanish</option>
+              </optgroup>
+            </select>
+          </div>
+          <button class='pass-button' value='Generate' onclick='generatePassphrase("cryptocurrency");'>Generate</button>
+          <div id='crypto-pass' class='password'></div>
+          <div class='use-entropy'>
+            <input type='checkbox' id='crypto-entropy-check' name='entropy-check' value='crypto-entropy'>
+            <label for='crypto-entropy-check'> Add entropy?</label>
+            <span></span> samples left.
+          </div>
+          <div class='stats'>
+            <span><a href='javascript:void(0)' onclick='toggleStats("cryptocurrency")'>Passphrase Statistics</a></span>
+          </div>
+          <div class='checksum'><span id='crypto-check'></span></div>
+          <div id='crypto-overlay' class='statistics'>
+            <dl>
+              <dt>Length:</dt><dd id='crypto-length'></dd>
+              <dt>Security:</dt><dd id='crypto-entropy'></dd>
+              <dt>Set size:</dt><dd id='crypto-set-size'></dd>
+            </dl>
+            <span class="cell_overlay">
+              <a href='javascript:void(0)' onclick='toggleStats("cryptocurrency")'>Click here to dismiss</a>
+            </span>
+          </div>
+          <div class='checksum'><span id='crypto-check'></span></div>
+        </div>
+
+        <div id='diceware-default' class='cell'>
+          <span class='cell-title'><strong>Diceware</strong></span>
+          <div class='optional'>
+            <select id='diceware-options'>
+              <option>Basque</option>
+              <option>Bulgarian</option>
+              <option>Catalan</option>
+              <option>Chinese</option>
+              <option>Czech</option>
+              <option>Danish</option>
+              <option>Dutch</option>
+              <option selected='selected'>English</option>
+              <option>English (Beale)</option>
+              <option>English (NLP)</option>
+              <option>Esperanto</option>
+              <option>Estonian</option>
+              <option>Finnish</option>
+              <option>French</option>
+              <option>German</option>
+              <option>Greek</option>
+              <option>Hebrew</option>
+              <option>Hungarian</option>
+              <option>Italian</option>
+              <option>Japanese</option>
+              <option>Latin</option>
+              <option>Maori</option>
+              <option>Norwegian</option>
+              <option>Polish</option>
+              <option>Portuguese</option>
+              <option>Romanian</option>
+              <option>Russian</option>
+              <option>Slovak</option>
+              <option>Slovenian</option>
+              <option>Spanish</option>
+              <option>Swedish</option>
+              <option>Turkish</option>
+            </select>
+          </div>
+          <button class='pass-button' value='Generate' onclick='generatePassphrase("diceware");'>Generate</button>
+          <div id='diceware-pass' class='password'></div>
+          <div class='use-entropy'>
+            <input type='checkbox' id='diceware-entropy-check' name='entropy-check' value='diceware-entropy'>
+            <label for='diceware-entropy-check'> Add entropy?</label>
+            <span></span> samples left.
+          </div>
+          <div class='stats'>
+            <span><a href='javascript:void(0)' onclick='toggleStats("diceware")'>Passphrase Statistics</a></span>
+          </div>
+          <div class='checksum'><span id='diceware-check'></span></div>
+          <div id='diceware-overlay' class='statistics'>
+            <dl>
+              <dt>Length:</dt><dd id='diceware-length'></dd>
+              <dt>Security:</dt><dd id='diceware-entropy'></dd>
+              <dt>Set size:</dt><dd id='diceware-set-size'></dd>
+            </dl>
+            <span class="cell_overlay">
+              <a href='javascript:void(0)' onclick='toggleStats("diceware")'>Click here to dismiss</a>
+            </span>
+          </div>
+          <div class='checksum'><span id='diceware-check'></span></div>
+        </div>
+
+        <div id='eff-default' class='cell'>
+          <span class='cell-title'><strong>EFF</strong></span>
+          <div class='optional'>
+            <select id='eff-options'>
+              <optgroup label='Official'>
+                <option>Distant Words</option>
+                <option>Long Words</option>
+                <option selected='selected'>Short Words</option>
+              </optgroup>
+              <optgroup label='Unofficial'>
+                <option>Game of Thrones</option>
+                <option>Harry Potter</option>
+                <option>Star Trek</option>
+                <option>Star Wars</option>
+            </select>
+          </div>
+          <button class='pass-button' value='Generate' onclick='generatePassphrase("eff");'>Generate</button>
+          <div id='eff-pass' class='password'></div>
+          <div class='use-entropy'>
+            <input type='checkbox' id='eff-entropy-check' name='entropy-check' value='eff-entropy'>
+            <label for='eff-entropy-check'> Add entropy?</label>
+            <span></span> samples left.
+          </div>
+          <div class='stats'>
+            <span><a href='javascript:void(0)' onclick='toggleStats("eff")'>Passphrase Statistics</a></span>
+          </div>
+          <div class='checksum'><span id='eff-check'></span></div>
+          <div id='eff-overlay' class='statistics'>
+            <dl>
+              <dt>Length:</dt><dd id='eff-length'></dd>
+              <dt>Security:</dt><dd id='eff-entropy'></dd>
+              <dt>Set size:</dt><dd id='eff-set-size'></dd>
+            </dl>
+            <span class="cell_overlay">
+              <a href='javascript:void(0)' onclick='toggleStats("eff")'>Click here to dismiss</a>
+            </span>
+          </div>
+          <div class='checksum'><span id='eff-check'></span></div>
+        </div>
+
+        <div id='pseudo-default' class='cell'>
+          <span class='cell-title'><strong>Pseudowords</strong></span>
+          <div class='optional'>
+            <select id='pseudo-options'>
+              <option>Apple Keychain</option>
+              <option>Bubble Babble</option>
+              <option>Daefen</option>
+              <option>DIBELS</option>
+              <option>Koremutake</option>
+              <option>Lepron</option>
+              <option>Letterblock Diceware</option>
+              <option>Munemo</option>
+              <option>Proquints</option>
+              <option>Urbit</option>
+            </select>
+          </div>
+          <button class='pass-button' value='Generate' onclick='generatePseudowords();'>Generate</button>
+          <div id='pseudo-pass' class='password'></div>
+          <div class='use-entropy'>
+            <input type='checkbox' id='pseudo-entropy-check' name='entropy-check' value='pseudo-entropy'>
+            <label for='pseudo-entropy-check'> Add entropy?</label>
+            <span></span> samples left.
+          </div>
+          <div class='stats'>
+            <span><a href='javascript:void(0)' onclick='toggleStats("pseudo")'>Pseudoword Statistics</a></span>
+          </div>
+          <div class='checksum'><span id='pseudo-check'></span></div>
+          <div id='pseudo-overlay' class='statistics'>
+            <dl>
+              <dt>Length:</dt><dd id='pseudo-length'></dd>
+              <dt>Security:</dt><dd id='pseudo-entropy'></dd>
+              <dt>Set size:</dt><dd id='pseudo-set-size'></dd>
+            </dl>
+            <span class="cell_overlay">
+              <a href='javascript:void(0)' onclick='toggleStats("pseudo")'>Click here to dismiss</a>
+            </span>
+          </div>
+          <div class='checksum'><span id='pseudo-check'></span></div>
+        </div>
+
+        <div id='random-default' class='cell'>
+          <span class='cell-title'><strong>Random</strong></span>
+          <div class='optional'>
+            <select id='random-options'>
+              <optgroup label='ASCII'>
+                <option selected>Base94</option>
+                <option>Base85</option>
+                <option>Base64</option>
+                <option>Base62</option>
+                <option>Base58</option>
+                <option>Base52</option>
+                <option>Base45</option>
+                <option>Base36</option>
+                <option>Base32</option>
+                <option>Base26</option>
+                <option>Base16</option>
+                <option>Base10</option>
+                <option>Base8</option>
+                <option>Base4</option>
+                <option>Base2</option>
+              </optgroup>
+              <optgroup label='Unicode'>
+                <option>Emoji</option>
+                <option>ISO 8859-1</option>
+                <option>Latin Extended</option>
+                <option>Mac OS Roman</option>
+                <option>Whitespace</option>
+              </optgroup>
+            </select>
+          </div>
+          <button class='pass-button' value='Generate' onclick='generateRandom();'>Generate</button>
+          <div id='random-pass' class='password'></div>
+          <div class='use-entropy'>
+            <input type='checkbox' id='random-entropy-check' name='entropy-check' value='random-entropy'>
+            <label for='random-entropy-check'> Add entropy?</label>
+            <span></span> samples left.
+          </div>
+          <div class='stats'>
+            <span><a href='javascript:void(0)' onclick='toggleStats("random")'>Password Statistics</a></span>
+          </div>
+          <div class='checksum'><span id='random-check'></span></div>
+          <div id='random-overlay' class='statistics'>
+            <dl>
+              <dt>Length:</dt><dd id='random-length'></dd>
+              <dt>Security:</dt><dd id='random-entropy'></dd>
+              <dt>Set size:</dt><dd id='random-set-size'></dd>
+            </dl>
+            <span class="cell_overlay">
+              <a href='javascript:void(0)' onclick='toggleStats("random")'>Click here to dismiss</a>
+            </span>
+          </div>
+          <div class='checksum'><span id='random-check'></span></div>
+        </div>
+      </div>
+      <div id='footer' class='clear'>
+        <p>Never trust online password generators, including this one.<br/>
+           For better security, use the <a href='bookmarklets.html'>bookmarklets</a>, or my <a href='https://github.com/atoponce/nodepassgen'>command-line tool</a>.<br/>
+           For best security, use the generator that ships with your password manager.</p>
+        <p><strong>For demonstration purposes only. It is not logging passwords.</strong></p>
+        <p>
+          <a href='https://github.com/atoponce/webpassgen'><img alt='Github logo' title='Get the source code' src='assets/github.png' /></a>
+          <a href='https://github.com/atoponce/webpassgen/releases/latest'><img alt='Download icon' title='Download latest release' src='assets/download.png' /></a>
+          <a href='https://twitter.com/AaronToponce'><img alt='Twitter logo' title='Meet the author' src='assets/twitter.png' /></a>
+        </p>
+        <p id='version'>Version: 20231024</p>
+      </div>
+    </div>
+    <div id='overlay' onclick='document.getElementById("overlay").style.display="none";'>
+        <div id='overlay_text'>
+            <p>🔥🔥🔥🔥🔥</p>
+            <p>Here be dragons!</p>
+            <p>Using non-ASCII Unicode characters could <a style='color: #F3BC00' href='https://apple.stackexchange.com/questions/202143/i-included-emoji-in-my-password-and-now-i-cant-log-in-to-my-account-on-yosemite'>lock you out of your account</a>!</p>
+            <p>Further, emoji code points specifically are <a style='color: #F3BC00' href='https://twitter.com/FakeUnicode/status/1192245294429130752'>ambiguous, ignored, unpredictable, and unstable</a>.</p>
+            <p>You should exercise extreme caution using Unicode passwords.</p>
+            <p>Click anywhere to continue.</p>
+            <p>🐉🐉🐉🐉🐉</p>
+        </div>
+    </div>
+
+    <!-- main page scripts -->
+    <script src='js/main.js'></script>
+
+    <!-- the box generator scripts -->
+    <script src='js/alternate.js'></script>
+    <script src='js/cryptocurrency.js'></script>
+    <script src='js/diceware.js'></script>
+    <script src='js/eff.js'></script>
+    <script src='js/pseudowords.js'></script>
+    <script src='js/random.js'></script>
+
+    <!-- alternate passphrase generator -->
+    <script src='lists/alternateAF.js'></script>
+    <script src='lists/alternateBE.js'></script>
+    <script src='lists/alternateColors.js'></script>
+    <script src='lists/alternateHR.js'></script>
+    <script src='lists/alternateDeseret.js'></script>
+    <script src='lists/alternateElvish.js'></script>
+    <script src='lists/alternateEyeware.js'></script>
+    <script src='lists/alternateKlingon.js'></script>
+    <script src='lists/alternateMN.js'></script>
+    <script src='lists/alternateObscure.js'></script>
+    <script src='lists/alternatePgp.js'></script>
+    <script src='lists/alternatePokerware.js'></script>
+    <script src='lists/alternateRockyou.js'></script>
+    <script src='lists/alternateShavian.js'></script>
+    <script src='lists/alternateSimpsons.js'></script>
+    <script src='lists/alternateSkey.js'></script>
+    <script src='lists/alternateSR.js'></script>
+    <script src='lists/alternateTrump.js'></script>
+    <script src='lists/alternateUK.js'></script>
+    <script src='lists/alternateVAN.js'></script>
+    <script src='lists/alternateWordle.js'></script>
+
+    <!-- cryptocurrency passphrase generator -->
+    <script src='lists/bitcoinCNSimp.js'></script>
+    <script src='lists/bitcoinCNTrad.js'></script>
+    <script src='lists/bitcoinCZ.js'></script>
+    <script src='lists/bitcoinEN.js'></script>
+    <script src='lists/bitcoinES.js'></script>
+    <script src='lists/bitcoinFR.js'></script>
+    <script src='lists/bitcoinIT.js'></script>
+    <script src='lists/bitcoinJP.js'></script>
+    <script src='lists/bitcoinKR.js'></script>
+    <script src='lists/bitcoinPT.js'></script>
+    <script src='lists/moneroCN.js'></script>
+    <script src='lists/moneroDE.js'></script>
+    <script src='lists/moneroEN.js'></script>
+    <script src='lists/moneroEO.js'></script>
+    <script src='lists/moneroES.js'></script>
+    <script src='lists/moneroFR.js'></script>
+    <script src='lists/moneroIT.js'></script>
+    <script src='lists/moneroJBO.js'></script>
+    <script src='lists/moneroJP.js'></script>
+    <script src='lists/moneroNL.js'></script>
+    <script src='lists/moneroPT.js'></script>
+    <script src='lists/moneroRU.js'></script>
+
+    <!-- diceware passphrase generator -->
+    <script src='lists/dicewareBG.js'></script>
+    <script src='lists/dicewareCA.js'></script>
+    <script src='lists/dicewareCN.js'></script>
+    <script src='lists/dicewareCZ.js'></script>
+    <script src='lists/dicewareDA.js'></script>
+    <script src='lists/dicewareDE.js'></script>
+    <script src='lists/dicewareEL.js'></script>
+    <script src='lists/dicewareEN.js'></script>     <!-- English -->
+    <script src='lists/dicewareBeale.js'></script>  <!-- English -->
+    <script src='lists/dicewareNLP.js'></script>    <!-- English -->
+    <script src='lists/dicewareEO.js'></script>
+    <script src='lists/dicewareES.js'></script>
+    <script src='lists/dicewareET.js'></script>
+    <script src='lists/dicewareEU.js'></script>
+    <script src='lists/dicewareFI.js'></script>
+    <script src='lists/dicewareFR.js'></script>
+    <script src='lists/dicewareHU.js'></script>
+    <script src='lists/dicewareIT.js'></script>
+    <script src='lists/dicewareIW.js'></script>
+    <script src='lists/dicewareJP.js'></script>
+    <script src='lists/dicewareLA.js'></script>
+    <script src='lists/dicewareMI.js'></script>
+    <script src='lists/dicewareNL.js'></script>
+    <script src='lists/dicewareNO.js'></script>
+    <script src='lists/dicewarePL.js'></script>
+    <script src='lists/dicewarePT.js'></script>
+    <script src='lists/dicewareRO.js'></script>
+    <script src='lists/dicewareRU.js'></script>
+    <script src='lists/dicewareSK.js'></script>
+    <script src='lists/dicewareSL.js'></script>
+    <script src='lists/dicewareSV.js'></script>
+    <script src='lists/dicewareTR.js'></script>
+
+    <!-- eff passphrase generator -->
+    <script src='lists/effDistant.js'></script>
+    <script src='lists/effGameOfThrones.js'></script>
+    <script src='lists/effHarryPotter.js'></script>
+    <script src='lists/effLong.js'></script>
+    <script src='lists/effShort.js'></script>
+    <script src='lists/effStarTrek.js'></script>
+    <script src='lists/effStarWars.js'></script>
+
+    <!-- pseudowords generator-->
+    <script src='lists/pseudoBigrams.js'></script>
+    <script src='lists/pseudoDibels.js'></script>
+
+    <!-- emoji - on its own -->
+    <script src='lists/randomEmoji.js'></script>
+
+    <script>
+      "use strict"
+
+      document.body.lang = navigator.language
+
+      window.onload = function() {
+        mork()
+        initTheme()
+        setSecurity()
+        loadPasses()
+      }
+    </script>
+  </body>
+

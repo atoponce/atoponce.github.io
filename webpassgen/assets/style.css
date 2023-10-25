@@ -1,0 +1,376 @@
+@font-face {
+  font-family: "Noto Color Emoji";
+  src: url("./NotoColorEmoji-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Sans Mono";
+  src: url("./NotoSansMono-Regular.woff2") format("woff2");
+}
+
+/* body tags */
+a {
+  color: #0000EE;
+}
+a:visited {
+  color: #551a8b;
+}
+body {
+  color: black; background-color: white;
+}
+dl {
+  display: flex;
+  flex-flow: row wrap;
+  margin-bottom: 0px;
+  margin-top: 32px;
+}
+dt {
+  flex-basis: 35%;
+  margin-left: 10px;
+  padding: 2px 4px;
+  text-align: right;
+}
+dd {
+  flex-basis: 55%;
+  margin: 0;
+  padding: 2px 4px;
+}
+select {
+  appearance: none;
+  background-color: #dddddd;
+  border:1px solid black;
+  border-radius: 2px;
+  color: black;
+  cursor: pointer;
+  font-size: 12px;
+  height: 25px;
+  padding: 3px 22px 3px 6px;
+  width: 165px;
+}
+select option {
+  background-color: #dddddd;
+  color :black;
+}
+select:hover {
+  background-color: #cccccc;
+}
+button {
+  background-color: #9951c0; /* purple */
+  border: #9951c0; /* purple */
+  border-radius: 2px;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-size: 14px;
+  height: 25px;
+  line-height: 25px;
+  padding: 0px;
+  text-decoration: none;
+  width: 80px;
+}
+button:hover {
+  background: #822fb0; /* purple */
+  text-decoration: none;
+}
+button:hover {
+  box-shadow: 1px 1px 0px #CCC;
+}
+
+/* classes */
+.clear { clear: both; }
+.dark_contrast {
+  text-shadow:
+    -1px -1px 0 #bbb,  0px -1px 0 #bbb,
+     1px -1px 0 #bbb, -1px  0px 0 #bbb,
+    -1px  1px 0 #bbb,  0px  1px 0 #bbb,
+     1px  1px 0 #bbb,  1px  0px 0 #bbb;
+}
+.light_contrast {
+  text-shadow:
+    -1px -1px 0 #444,  0px -1px 0 #444,
+     1px -1px 0 #444, -1px  0px 0 #444,
+    -1px  1px 0 #444,  0px  1px 0 #444,
+     1px  1px 0 #444,  1px  0px 0 #444;
+}
+.bold {
+  font-weight: bold;
+}
+.use-entropy {
+  bottom: 10px;
+  left: 10px;
+  font-size: 12px;
+  position: absolute;
+  visibility: hidden;
+}
+.stats, .cell_overlay {
+  bottom: 10px;
+  font-size: 12px;
+  position: absolute;
+  right: 10px;
+}
+.statistics {
+  background-color: rgba(0, 0, 0, 0.85);
+  color: white;
+  cursor: pointer;
+  display: none;
+  font-size: x-large;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+.stats a, .stats a:visited {
+  color: #0000EE;
+}
+.statistics a, .statistics a:visited {
+  color: yellow;
+}
+.entropy {
+  right: 50%;
+  position: absolute;
+}
+.checksum {
+  bottom: 27px;
+  right: 10px;
+  font-size: 12px;
+  position: absolute;
+}
+.cell {
+  border: 1px solid black;
+  border-radius: 2px;
+  display: table-cell;
+  float: left;
+  height: 210px;
+  margin: 5px;
+  position: relative;
+  vertical-align: middle;
+  width: 372px;
+}
+.password {
+  align-items: center;
+  display: inline-grid;
+  font-family: "Noto Sans Mono";
+  font-size: 12pt;
+  height: 180px;
+  padding: 0 10px;
+  text-align: center;
+  width: 352px;
+}
+.p48::selection { background-color: #ff6464; }
+.p56::selection { background-color: #ffcb64; }
+.p64::selection { background-color: #ffff64; }
+.p72::selection { background-color: #55d955; }
+.colors, .acronym {
+  display: block;
+  margin-top: 57px;
+}
+.acronym p{
+  align-items: center;
+  display: inline-block;
+  margin: 0;
+}
+.acronym p::first-letter {
+  color: red;
+  font-weight: bold;
+}
+.cell-title {
+  background-color: #5777c0; /* blue */
+  border-bottom: 1px solid black;
+  color: white;
+  display: inline-block;
+  margin-top: 0px;
+  padding: 5px 0;
+  text-align: center;
+  width: 100%;
+}
+.optional {
+  left: 10px;
+  position: absolute;
+  top: 40px;
+}
+.optional::after {
+  bottom: 3px;
+  color: black;
+  content: '▶';
+  font-size: 13px;
+  left: 145px;
+  pointer-events: none;
+  position: absolute;
+  transform: rotate(90deg);
+}
+.feather {
+  vertical-align: text-bottom;
+}
+.pass-button {
+  display: inline-block;
+  position: absolute;
+  right: 10px;
+  top: 40px;
+}
+.whitespace {
+  display: inline-flex;
+  justify-content: center;
+  quotes: auto;
+  tab-size: 1;
+  /* Do not use "pre-wrap", as it removes end-of-line space.
+     "break-spaces" does not collapse tabs and spaces.
+     https://developer.mozilla.org/en-US/docs/Web/CSS/white-space */
+  white-space: break-spaces;
+}
+.whitespace::before {
+  content: open-quote;
+}
+.whitespace::after {
+  content: close-quote;
+}
+
+/* ids */
+#container {
+  margin: 0 auto;
+  pointer-events: auto;
+  width: 768px;
+}
+#header {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+}
+#footer {
+  text-align: center;
+}
+#version {
+  font-size: 10pt;
+}
+#overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 1;
+  cursor: pointer;
+}
+#overlay_text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 18pt;
+  color: white;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+#content {
+  display: table;
+  margin-top: 10px;
+}
+#navigation {
+  padding-left: 0;
+}
+#navigation li {
+  display: inline;
+  list-style-type: none;
+  margin: 0 auto;
+  padding: 0 10px 0 10px;
+}
+#alt-pass, #crypto-pass, #diceware-pass, #eff-pass, #pseudo-pass {
+  word-break: break-word;
+}
+#random-pass {
+  word-break: break-all;
+}
+#password-strength {
+  margin: 0px auto;
+}
+
+#input {
+  display: block;
+  margin: 10px auto;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+  width: 200px;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  background: var(--track-background, none);
+  border: 1px solid black;
+  border-radius: 2px;
+  height: 16px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background: #7f7f7f;
+  border: 1px solid black;
+  border-radius: 2px;
+  height: 24px;
+  margin-top: -5px;
+  width: 24px;
+}
+
+input[type=range]::-moz-range-track {
+  background: var(--track-background, none);
+  border: 1px solid black;
+  border-radius: 2px;
+  height: 16px;
+}
+
+input[type=range]::-moz-range-thumb {
+  background: #7f7f7f;
+  border: 1px solid black;
+  border-radius: 2px;
+  height: 24px;
+  width: 24px;
+}
+
+/* Mouse Entropy CSS */
+#randogram {
+  cursor: url('data:image/gif;base64,R0lGODlhFAAUAPABAKoAAP///yH5BAUKAAEALAAAAAAUABQAQAIsRI6pCe2+1Is0PFPl3Vj3zGzgwU2UOFpfqrJh46rmWNLl6t3nPSOXC4nhUgUAOw=='), crosshair;
+  margin: 0 calc((100% - 400px)/2);
+  touch-action: none;
+}
+.collected {
+  font-family: monospace;
+  font-weight: bold;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+}
+
+@media only screen and (max-width: 767px) {
+  #container { width: 480px; }
+  .cell { margin: 5px 10px; width: 460px; }
+  .password { width: 440px; }
+}
+@media only screen and (max-width: 479px) {
+  #container { width: 100%; }
+  .cell { width: 95%; }
+  .password { width: 95%; }
+}
+
+/* override styles for Dark Theme */
+body.dark-theme {color: white; background-color: black;}
+.dark-theme .cell { border-color: #FFF; }
+.dark-theme a {color: yellow;}
+.dark-theme a:visited {color: orange;}
+.dark-theme img {filter: invert(1);}
+.dark-theme input[type=range]::-webkit-slider-runnable-track {border: 1px solid white;}
+.dark-theme input[type=range]::-webkit-slider-thumb {border: 1px solid white;}
+.dark-theme input[type=range]::-moz-range-track {border: 1px solid white;}
+.dark-theme input[type=range]::-moz-range-thumb {border: 1px solid white;}
+.dark-theme .statistics {background-color: rgb(255, 255, 255, 0.85); color: black;}
+.dark-theme .stats a {color: yellow;}
+.dark-theme .stats a:visited {color: yellow;}
+.dark-theme .statistics a {color: #0000EE;}
+.dark-theme .statistics a:visited {color: #0000EE;}
+
+#theme_switcher {
+  text-decoration: none;
+}
