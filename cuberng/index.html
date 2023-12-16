@@ -34,20 +34,24 @@
         </li>
       </ul>
       <div class="tab-content" id="tabbedContent">
-        <div id="color-swatches">
-          <span>Select a facelet color:</span>
-          <span class="color-picker">
-            <span onclick="getColor(this)" class="facelet"></span>
-            <span onclick="getColor(this)" class="white"></span>
-            <span onclick="getColor(this)" class="orange"></span>
-            <span onclick="getColor(this)" class="green"></span>
-            <span onclick="getColor(this)" class="red"></span>
-            <span onclick="getColor(this)" class="blue"></span>
-            <span onclick="getColor(this)" class="yellow"></span>
-          </span>
-          <span>Selected color:</span>
-          <span id="color" class="facelet"></span>
-        </div>
+        <table id="color-swatches">
+          <tr>
+            <td style="text-align: right">Select a facelet color:</td>
+            <td class="color-picker">
+              <span onclick="getColor(this)" class="facelet"></span>
+              <span onclick="getColor(this)" class="white"></span>
+              <span onclick="getColor(this)" class="orange"></span>
+              <span onclick="getColor(this)" class="green"></span>
+              <span onclick="getColor(this)" class="red"></span>
+              <span onclick="getColor(this)" class="blue"></span>
+              <span onclick="getColor(this)" class="yellow"></span>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: right">Selected color:</span>
+            <td id="color" class="facelet"></span>
+          </tr>
+        </table>
         <!-- 2x2 -->
         <div class="grid tab-pane" id="mini" role="tabpanel" aria-labelledby="mini-tab">
           <div class="face up">
@@ -449,7 +453,7 @@
           <span id="professor-hash"></span>
         </div>
         <div class="tab-pane" id="security" role="tabpanel" aria-labelledby="security-tab">
-          <p>The security of using the Rubik's Cube as a hardware random number generator (HWRNG) is based strictly on the size of the permutation space for each cube. Which means our threat model is requiring the adversary to find the exact permutation state we just created. The cube can be thought of as a series of 18 unique quarter-twists. Because the current permutation is strictly based on the previous permutation, this makes the Rubik's Cube chaotic rather than truly random. However, chaotic systems, such as lava lamps and double pendulums, can still good sources of randomness if handled carefully, so that's what this page is hoping to accomplish.</p>
+          <p>The security of using the Rubik's Cube as a hardware random number generator (HWRNG) is based strictly on the size of the permutation space for each cube. Which means our threat model is requiring the adversary to find the exact permutation state we just created. The cube can be thought of as a series of 18 unique quarter-twists. Because the current permutation is strictly based on the previous permutation, this makes the Rubik's Cube chaotic rather than truly random. However, chaotic systems, such as lava lamps and double pendulums, can still be good sources of randomness if handled carefully, so that's what this page is hoping to accomplish.</p>
           <p>The number of unique permutations in an N×N×N cube are as follows:</p>
           <ul>
             <li><strong>2×2×2</strong>: <a href="https://en.wikipedia.org/wiki/Pocket_Cube#Permutations">3.674 million</a></li>
@@ -531,13 +535,13 @@
             <div class="facelet none">53</div>
             <div class="facelet none">54</div>
           </div>
-          <p>Because the security of CubeRNG is based on the permutation state of the cube, it's critical that you do sufficient quarter twists such that it is difficult for an adversary to reproduce. For solving the 3×3×3 Rubki's Cube, it has been shown that regardless of the permutation state of the cube, it can always be solved in 20 moves, or 26 quarter twists, or less. This is known as "<a href="https://cube20.org">God's Number</a>. As such, the World Cube Association has a Java program called "<a href="https://github.com/thewca/tnoodle">TNoodle</a>" that applies on average 20 twists to a 3×3×3 cube before a competitor can attempt solving it. In fact, the number of turns TNoodle performs on each cube it supports in competition is:</p>
+          <p>Because the security of CubeRNG is based on the permutation state of the cube, it's critical that you do sufficient quarter twists such that it is difficult for an adversary to reproduce. For solving the 3×3×3 Rubik's Cube, it has been shown that regardless of the permutation state of the cube, it can always be solved in 20 moves, or 26 quarter twists, or less. This is known as "<a href="https://cube20.org">God's Number</a>. As such, the World Cube Association has a Java program called "<a href="https://github.com/thewca/tnoodle">TNoodle</a>" that applies on average 20 twists to a 3×3×3 cube before a competitor can attempt solving it. In fact, the number of turns TNoodle performs on each cube it supports in competition is:</p>
           <ul>
             <li><strong>2×2×2</strong>: ~11 moves (average)</li>
             <li><strong>3×3×3</strong>: ~19 moves (average)</li>
             <li><strong>4×4×4</strong>: ~44 moves (average)</li>
             <li><strong>5×5×5</strong>: 60 moves</li>
-            <li><strong>6×6×6</strong>: 30 moves</li>
+            <li><strong>6×6×6</strong>: 80 moves</li>
             <li><strong>7×7×7</strong>: 100 moves</li>
           </ul>
           <p>However, solving the cube is different than producing an unpredictable state for an adversary. <a href="https://theconversation.com/how-hard-is-it-to-scramble-rubiks-cube-129916">Some research has been done</a> investigating the number of required twists to maximize uniform distribution of permutations. For the 2×2×2 cube, according to that post, 20 moves are necessary, which is about 10 more than what the World Cube Association requires for competition. So scrambling a cube for sufficient security might require 10+ more moves past God's Number. This would then look like:</p>
