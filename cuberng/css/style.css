@@ -1,0 +1,78 @@
+:root {
+  /* Global variables. Tweak here as needed. */
+  --face-margin: 10px;
+  --face-width: 120px;
+  --facelet-border: 1px;
+  --facelet-width: 25px;
+}
+
+.face {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: var(--face-margin);
+  margin-right: var(--face-margin);
+  height: 120px;
+  width: 120px;
+}
+
+.facelet {
+  background-color: #cccccc;
+  background-image: radial-gradient(circle at center, black calc(2 * var(--facelet-border)), transparent 0);
+  outline: var(--facelet-border) black solid;
+  text-align: center;
+}
+
+.none {
+  background-image: none;
+}
+
+.grid {
+  float: left;
+}
+
+#color {
+  display: inline-block;
+  height: var(--facelet-width);
+  outline: var(--facelet-border) black solid;
+  width: var(--facelet-width);
+}
+
+/* 2x2 */
+#mini .face .facelet { height: calc(var(--face-width) / 2); width: calc(var(--face-width) / 2); }
+#mini .up, #mini .down { margin-left: calc(var(--face-width) + var(--face-margin)); }
+
+/* 3x3 */
+#rubik .face .facelet { height: calc(var(--face-width) / 3); width: calc(var(--face-width) / 3); }
+#rubik .up, #rubik .down { margin-left: calc(var(--face-width) + var(--face-margin)); }
+#security .face .facelet { height: calc(var(--face-width) / 3); width: calc(var(--face-width) / 3); }
+#security .up, #security .down { margin-left: calc(var(--face-width) + var(--face-margin)); }
+
+/* 4x4 */
+#master .face .facelet { height: calc(var(--face-width) / 4); width: calc(var(--face-width) / 4); }
+#master .up, #master .down { margin-left: calc(var(--face-width) + var(--face-margin)); }
+
+/* 5x5 */
+#professor .face .facelet { height: calc(var(--face-width) / 5); width: calc(var(--face-width) / 5); }
+#professor .up, #professor .down { margin-left: calc(var(--face-width) + var(--face-margin)); }
+
+.left, .front, .right, .back { float: left; }
+.up, .down { clear: both; }
+
+.white { background-color: #ffffff; background-image: none; }
+.orange { background-color: #ff5800; background-image: none; }
+.green { background-color: #009e60; background-image: none; }
+.red { background-color: #c41e3a; background-image: none; }
+.blue { background-color: #0051ba; background-image: none; }
+.yellow { background-color: #ffd500; background-image: none; }
+
+.color-picker span {
+  display: inline-block;
+  height: var(--facelet-width);
+  outline: var(--facelet-border) black solid;
+  width: var(--facelet-width);
+}
+
+.nav {
+  background-color: #333;
+  overflow: hidden;
+}
