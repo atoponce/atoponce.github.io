@@ -30,13 +30,6 @@
   float: left;
 }
 
-#color {
-  display: inline-block;
-  height: var(--facelet-width);
-  outline: var(--facelet-border) black solid;
-  width: var(--facelet-width);
-}
-
 /* 2x2 */
 #mini .face .facelet { height: calc(var(--face-width) / 2); width: calc(var(--face-width) / 2); }
 #mini .up, #mini .down { margin-left: calc(var(--face-width) + var(--face-margin)); }
@@ -72,7 +65,23 @@
   width: var(--facelet-width);
 }
 
+#color {
+  display: inline-block;
+  height: var(--facelet-width);
+  margin: var(--face-margin);
+  outline: var(--facelet-border) black solid;
+  width: var(--facelet-width);
+}
+
 .nav {
   background-color: #333;
   overflow: hidden;
+}
+
+table {
+  margin: var(--face-margin);
+}
+
+td {
+  padding: var(--face-margin);
 }
