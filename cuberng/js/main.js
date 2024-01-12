@@ -115,21 +115,23 @@ function hashCube(size) {
   }
 
   sha256(cube.join("")).then(function(digest) {
+    let result = ""
     const view = new DataView(digest)
 
     if (size === 2) { // 2x2: ~21 bits (0x1f_ff_ff)
-      const int = view.getUint8(0) & 0x1f
-      result = int.toString(16).padStart(2, "0")
+      const n = view.getUint8(0) & 0x1f
+      result = n.toString(16).padStart(2, "0")
       for (let i = 1; i < 3; i++) result += view.getUint8(i).toString(16).padStart(2, "0")
+      console.log(result)
     } else if (size === 3) { // 3x3: ~65 bits (0x1_ff_ff_ff_ff_ff_ff_ff_ff)
-      const int = view.getUint8(0) & 0x1
-      result = int.toString(16)
+      const n = view.getUint8(0) & 0x1
+      result = n.toString(16)
       for (let i = 1; i < 9; i++) result += view.getUint8(i).toString(16).padStart(2, "0")
     } else if (size === 4) { // 4x4: ~152 bits (0xff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff)
       for (let i = 1; i < 19; i++) result += view.getUint8(i).toString(16).padStart(2, "0")
     } else { // 5x5: ~247 bits (0x7f_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff)
-      const int = view.getUint8(0) & 0x7f
-      result = int.toString(16).padStart(2, "0")
+      const n = view.getUint8(0) & 0x7f
+      result = n.toString(16).padStart(2, "0")
       for (let i = 1; i < 31; i++) result += view.getUint8(i).toString(16).padStart(2, "0")
     }
 
