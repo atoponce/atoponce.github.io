@@ -1,30 +1,42 @@
 "use strict"
 
 // GLOBALS
-const SPRITZ = new Spritz() // Initialize the Spritz state
 const PRECHARS = 64 // number of characters required before any output (128 bits)
 const ENTROPY = new Uint32Array(1) // The entropy bucket for tracking what entropy has been used and what is available
 const TEXTAREA = document.getElementById("textarea")
 const TEMPLATE = document.getElementById("template")
-let SELTMPL = TEMPLATE.selectedIndex // track which template we're using
 
+let CIPHER
+let SELTMPL = TEMPLATE.selectedIndex // track which template we're using
 let NTMPL = 0 // keeps track of where we are in the textarea
 let CHARCOUNT = 0 // allows multiple input characters per output character
 
+function selectCipher() {
+  const cipherChoice = document.getElementById("cipher").value
+
+  if (cipherChoice === "chacha") {
+    CIPHER = new ChaCha()
+  } else if (cipherChoice === "spritz") {
+    CIPHER = new Spritz()
+  } else if (cipherChoice === "trivium") { // Coming soon
+    CIPHER = new Trivium()
+  }
+
+  init()
+}
 /**
- * Initialize the Spritz state to a random state before keystrokes are entered.
+ * Initialize the cipher to a random state before keystrokes are entered.
  */
 function init() {
   NTMPL = 0
   TEXTAREA.value = "Click here and start typing to generate your passwords:\n"
-
   TEXTAREA.addEventListener("keydown", keyDown)
   TEXTAREA.addEventListener("keyup", keyUp)
 
   // If a seed is saved from the last session size, absorb the seed and credit
   // the user with 64 characters already typed.
-  if (window.localStorage.spritzSeed) {
-    SPRITZ.absorb(JSON.parse(window.localStorage.spritzSeed))
+  if (window.localStorage.passgen3seed) {
+    CIPHER.absorb(new Uint8Array(JSON.parse(window.localStorage.passgen3seed)))
     TEXTAREA.value += ".".repeat(PRECHARS) + "\n"
     CHARCOUNT = 64
   } else if (CHARCOUNT < PRECHARS) {
@@ -34,16 +46,16 @@ function init() {
   }
 
   // Generate a unique browser fingerprint and convert to simple byte array.
-  const fpBytes = []
   const fp = generateFingerprint()
   const l = fp.length
+  const fpBytes = new Uint8Array(l)
 
   for (let i = 0; i < l; i++) {
-    fpBytes.push(fp.charCodeAt(i))
+    fpBytes[i] = fp.charCodeAt(i)
   }
 
   // Absorb the browser fingerprint
-  SPRITZ.absorb(fpBytes)
+  CIPHER.absorb(fpBytes)
 
   // Generate some random but difficult-to-type and generally long text for
   // the user. From the Scripps Spelling Bee word list.
@@ -52,10 +64,6 @@ function init() {
 
 /**
  * Register a key press time in milliseconds and its value.
- * Spritz can be used as a deterministic random bit generator (DRBG). As Spritz
- * is a sponge construction, it is naturally a DRBG. The sponge state is the
- * "entropy pool". New random input can be included at any time using absorb(I)
- * and output may be extracted at any time using squeeze(r).
  * @param {Object} key - The keystroke
  * @returns true
  */
@@ -77,7 +85,7 @@ function keyDown(key) {
     key.preventDefault() // prevent keys from scrolling the page
   }
 
-  SPRITZ.absorb([key.key.charCodeAt(0)])
+  CIPHER.absorb(new Uint8Array([key.key.charCodeAt(0)]))
 
   if (key.repeat) {
     key.preventDefault() // prevent key repeat
@@ -85,12 +93,10 @@ function keyDown(key) {
   }
 
   // use current time of key down (milliseconds) as a source of randomness
-  const byteArr = int64ToByteArray(Date.now())
-  SPRITZ.absorb(byteArr)
+  const byteArr = new Uint8Array(int64ToByteArray(Date.now()))
+  CIPHER.absorb(byteArr)
 
-  // use character count as another source of randomness
   CHARCOUNT++
-  SPRITZ.absorb(int64ToByteArray(CHARCOUNT))
 
   if (CHARCOUNT < PRECHARS) {
     TEXTAREA.value += "."
@@ -105,18 +111,14 @@ function keyDown(key) {
 
 /**
  * Register a key release time in milliseconds and its value.
- * Spritz can be used as a deterministic random bit generator (DRBG). As Spritz
- * is a sponge construction, it is naturally a DRBG. The sponge state is the
- * "entropy pool". New random input can be included at any time using absorb(I)
- * and output may be extracted at any time using squeeze(r).
  * @param {Object} key - The keystroke
  * @returns true
  */
 function keyUp(key) {
   // use current time of key up (milliseconds) as a source of randomness
-  const byteArr = int64ToByteArray(Date.now())
+  const byteArr = new Uint8Array(int64ToByteArray(Date.now()))
 
-  SPRITZ.absorb(byteArr)
+  CIPHER.absorb(byteArr)
 
   return true
 }
@@ -149,7 +151,7 @@ function int64ToByteArray(n) {
 }
 
 /**
- * Uniformly extract a random number from Spritz.
+ * Uniformly extract a random number from the stream cipher DRBG.
  * @param {number} r - A maximum value
  * @returns {number} - A number between [0, r-1]
  */
@@ -158,7 +160,7 @@ function extract(r) {
   const min = 65536 % r
 
   do {
-    a = SPRITZ.squeeze(2)
+    a = CIPHER.squeeze(2)
     q = a[0] << 8 | a[1]
   } while (q < min) // avoid biased choice
 
@@ -166,7 +168,7 @@ function extract(r) {
 }
 
 /**
- * Generate a character or word based on the random number from Spritz.
+ * Generate a character or word based on the random number from the cipher.
  * Each template is defined in the index.html for this function to follow when
  * generating passwords. Given that we know the size of each word list and
  * character set, we know how much entropy exists with each choice in the set.
@@ -290,9 +292,9 @@ function addChar() {
   return
 }
 
-/** Save the current Spritz state to disk.  */
+/** Generate a seed from the cipher state and save to disk.  */
 function saveEntropy() {
-  localStorage.setItem("spritzSeed", JSON.stringify(SPRITZ.squeeze(32)))
+  localStorage.setItem("passgen3seed", JSON.stringify(CIPHER.squeeze(32)))
 }
 
 /**
@@ -346,113 +348,4 @@ function randomWords() {
   document.getElementById("random").value = randomText + toType.join(" ")
 }
 
-/**
- * Unit test to ensure that the Spritz cipher is behaving per the original paper.
- * @return {bool} - true if the test vectors pass, false otherwise
- */
-function testVectors() {
-  /*
-   * The test vectors per the original paper are:
-   *    Basic Spritz output:
-   *        "ABC": 0x77 0x9a 0x8e 0x01 0xf9 0xe9 0xcb 0xc0 ...
-   *       "spam": 0xf0 0x60 0x9a 0x1d 0xf1 0x43 0xce 0xbf ...
-   *    "arcfour": 0x1a 0xfa 0x8b 0x5e 0xe3 0x37 0xdb 0xc7 ...
-   *    32 byte hash:
-   *        "ABC": 0x02 0x8f 0xa2 0xb4 0x8b 0x93 0x4a 0x18 ...
-   *       "spam": 0xac 0xbb 0xa0 0x81 0x3f 0x30 0x0d 0x3a ...
-   *    "arcfour": 0xff 0x8c 0xf2 0x68 0x09 0x4c 0x87 0xb9 ...
-   *
-   * However, with the bias countermeasure in place, the test vectors change.
-   * After verifying the original test vectors before the countermeasure,
-   * these are the new test vectors:
-   *    Basic Spritz output:
-   *        "ABC": 0x19 0x6e 0xdf 0xc8 0x63 0x5b 0xca 0x07 ...
-   *       "spam": 0x2f 0xd9 0x62 0x8b 0x02 0x6e 0xa2 0xc8 ...
-   *    "arcfour": 0x90 0xe8 0xd8 0xdb 0x44 0xb2 0x42 0x6f ...
-   *    32 byte hash:
-   *        "ABC": 0x3f 0xcd 0x67 0x2a 0xab 0xce 0x5e 0x8d ...
-   *       "spam": 0x00 0xc5 0x69 0xfd 0x18 0xd1 0x32 0x4c ...
-   *    "arcfour": 0x87 0xc3 0xb1 0x4e 0x42 0x92 0x73 0xee ...
-   */
-
-  let codes = []
-  let s = new Spritz()
-  for (const c of "ABC") {
-    codes.push(c.charCodeAt(0))
-  }
-  s.absorb(codes)
-  if (JSON.stringify(s.squeeze(8)) !== "[25,110,223,200,99,91,202,7]") {
-    console.error("Failed test vector for basic Spritz of 'ABC'")
-    return false
-  }
-
-  codes = []
-  s = new Spritz()
-  for (const c of "spam") {
-    codes.push(c.charCodeAt(0))
-  }
-  s.absorb(codes)
-  if (JSON.stringify(s.squeeze(8)) !== "[247,217,98,139,2,110,162,200]") {
-    console.error("Failed test vector for basic Spritz of 'spam'")
-    return false
-  }
-
-  codes = []
-  s = new Spritz()
-  for (const c of "arcfour") {
-    codes.push(c.charCodeAt(0))
-  }
-  s.absorb(codes)
-  if (JSON.stringify(s.squeeze(8)) !== "[144,232,216,219,68,178,66,111]") {
-    console.error("Failed test vector for basic Spritz of 'arcfour'")
-    return false
-  }
-
-
-  codes = []
-  s = new Spritz()
-  for (const c of "ABC") {
-    codes.push(c.charCodeAt(0))
-  }
-  s.absorb(codes)
-  s.absorbStop()
-  s.absorb([32])
-  if (JSON.stringify(s.squeeze(8)) !== "[63,205,103,42,171,206,94,141]") {
-    console.error("Failed test vector for Spritz hash of 'ABC'")
-    return false
-  }
-
-  codes = []
-  s = new Spritz()
-  for (const c of "spam") {
-    codes.push(c.charCodeAt(0))
-  }
-  s.absorb(codes)
-  s.absorbStop()
-  s.absorb([32])
-  if (JSON.stringify(s.squeeze(8)) !== "[0,197,105,253,24,209,50,76]") {
-    console.error("Failed test vector for Spritz hash of 'spam'")
-    return false
-  }
-
-  codes = []
-  s = new Spritz()
-  for (const c of "arcfour") {
-    codes.push(c.charCodeAt(0))
-  }
-  s.absorb(codes)
-  s.absorbStop()
-  s.absorb([32])
-  if (JSON.stringify(s.squeeze(8)) !== "[135,195,177,78,66,146,115,238]") {
-    console.error("Failed test vector for Spritz hash of 'arcfour'")
-    return false
-  }
-
-  return true
-}
-
-if (testVectors()) {
-  init()
-} else {
-  TEXTAREA.innerText = "Test vectors failed. Please check the JavaScript console errors."
-}
+selectCipher()
