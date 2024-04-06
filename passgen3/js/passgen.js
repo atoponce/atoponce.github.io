@@ -11,19 +11,6 @@ let SELTMPL = TEMPLATE.selectedIndex // track which template we're using
 let NTMPL = 0 // keeps track of where we are in the textarea
 let CHARCOUNT = 0 // allows multiple input characters per output character
 
-function selectCipher() {
-  const cipherChoice = document.getElementById("cipher").value
-
-  if (cipherChoice === "chacha") {
-    CIPHER = new ChaCha()
-  } else if (cipherChoice === "spritz") {
-    CIPHER = new Spritz()
-  } else if (cipherChoice === "trivium") { // Coming soon
-    CIPHER = new Trivium()
-  }
-
-  init()
-}
 /**
  * Initialize the cipher to a random state before keystrokes are entered.
  */
@@ -33,10 +20,20 @@ function init() {
   TEXTAREA.addEventListener("keydown", keyDown)
   TEXTAREA.addEventListener("keyup", keyUp)
 
+  let cipherChoice = document.getElementById("cipher").value
+
+  if (cipherChoice === "chacha") {
+    CIPHER = new ChaCha()
+  } else if (cipherChoice === "spritz") {
+    CIPHER = new Spritz()
+  } else if (cipherChoice === "trivium") {
+    CIPHER = new Trivium()
+  }
+
   // If a seed is saved from the last session size, absorb the seed and credit
   // the user with 64 characters already typed.
-  if (window.localStorage.passgen3seed) {
-    CIPHER.absorb(new Uint8Array(JSON.parse(window.localStorage.passgen3seed)))
+  if (localStorage.passgen3seed) {
+    CIPHER.absorb(new Uint8Array(JSON.parse(localStorage.passgen3seed)))
     TEXTAREA.value += ".".repeat(PRECHARS) + "\n"
     CHARCOUNT = 64
   } else if (CHARCOUNT < PRECHARS) {
@@ -294,6 +291,7 @@ function addChar() {
 
 /** Generate a seed from the cipher state and save to disk.  */
 function saveEntropy() {
+  localStorage.setItem("passgen3cipher", document.getElementById("cipher").value)
   localStorage.setItem("passgen3seed", JSON.stringify(CIPHER.squeeze(32)))
 }
 
@@ -348,4 +346,4 @@ function randomWords() {
   document.getElementById("random").value = randomText + toType.join(" ")
 }
 
-selectCipher()
+init()

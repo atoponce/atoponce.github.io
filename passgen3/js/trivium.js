@@ -2,55 +2,53 @@
 
 /** Class representing the Trivium stream cipher. */
 class Trivium {
-  #state      
+  #state      // Trivium state bit array.
   #keystream  // Trivium keystream.
-  #pool
-  #poolpos
+  #pool       // Keyboard entropy pool.
+  #counter    // Keyboard entropy pool counter.
 
-  /**
-   * Initialize Trivium with key and IV.
-   * @param {Uint8Array} key - An 8-bit array of 10 unsigned integers.
-   * @param {Uint8Array} iv - An 8-bit array of 10 unsigned integers.
-   * @throws {Error}
-   */
-  constructor(key, iv) {
-    if (typeof key === "undefined") {
-      key = new Uint8Array([
-        0x53, 0x65, 0x74, 0x20, 0x54, 0x72, 0x69, 0x76, 0x69, 0x75 // "Set Triviu"
-      ])
-    }
+  /** Initialize Trivium with key and IV. */
+  constructor() {
+    const now = Date.now()
+    const perf = performance.now() >>> 0
 
-    if (typeof iv === "undefined") {
-      iv = new Uint8Array([
-        0x6d, 0x20, 0x6b, 0x65, 0x79, 0x20, 0x26, 0x20, 0x49, 0x56 // "m key & IV"
-      ])
-    }
+    const high = Math.trunc(now / 0x1_0000_0000) // Upper 32-bits
+    const low = (now & 0xffffffff) >>> 0  // Lower 32-bits
 
-    if (!(key instanceof Uint8Array) || key.length !== 10) {
-      throw new Error("Key should be a 10-element Uint8Array.")
-    }
+    // Date.now() in milliseconds since Jan 1, 1970 00:00:00 is 48-bits long.
+    const t = [
+       (high >>  8) & 0xff, high & 0xff,
+       (low >> 24) & 0xff, (low >> 24) & 0xff, (low >>  8) & 0xff, low & 0xff,
+    ]
 
-    if (!(iv instanceof Uint8Array) || iv.length !== 10) {
-      throw new Error("IV should be a 10-element Uint8Array.")
-    }
+    // That leaves 32-bits for performance.now(), or about 49.71 days of uptime.
+    const p = [
+      (perf >> 24) & 0xff, (perf >> 16) & 0xff, (perf >> 8) & 0xff, perf & 0xff
+    ]
+
+    const key = new Uint8Array([
+      0x54, 0x72, 0x69, 0x76, 0x69, 0x75, 0x6d, 0x4B, 0x65, 0x79 // "TriviumKey"
+    ])
+
+    const iv = new Uint8Array([
+      t[0], t[1], t[2], t[3], t[4], t[5], p[0], p[1], p[2], p[3] // Time-based IV
+    ])
 
     this.#state = new Array(288).fill(0)
     this.#pool = new Uint8Array(10)
-    this.#poolpos = 0
+    this.#counter = 0
 
     const keyBits = []
     const ivBits = []
 
     for (let i = 0; i < 10; i++) {
-      let tmpBits = this.#byteToBits(key[i])
-      tmpBits.reverse()
+      let tmpBits = this.#byteToBits(key[i]).reverse()
 
       for (let j = 0; j < 8; j++) {
         keyBits.push(tmpBits[j])
       }
 
-      tmpBits = this.#byteToBits(iv[i])
-      tmpBits.reverse()
+      tmpBits = this.#byteToBits(iv[i]).reverse()
 
       for (let j = 0; j < 8; j++) {
         ivBits.push(tmpBits[j])
@@ -80,6 +78,34 @@ class Trivium {
    */
   get state() {
     return this.#state
+  }
+
+  /**
+   * Set the Trivium state.
+   * @param {Array} s - An array of 16 32-byte integers.
+   */
+  set state(s) {
+    if (
+      s instanceof Array && // Ensure array argument.
+      s.length === 288 && // Ensure 288 array elements.
+      s.filter(Number.isInteger).length === 288 // Ensure 288 numbers.
+    ) {
+      // Force 1-bit values for the full state.
+      for (let i = 0; i < 288; i++) {
+        s[i] &= 1
+      }
+
+      // Clamp the last 3 bits to '1' to mitigate an all-zero state.
+      s[285] = 1
+      s[286] = 1
+      s[287] = 1
+
+      this.#state = s
+    } else {
+      throw new Error(
+        "Invalid state. Must be an array of 16 32-byte integers."
+      )
+    }
   }
 
   /**
@@ -148,10 +174,6 @@ class Trivium {
    * @throws {Error}
    */
   #update(data) {
-    if (!(data instanceof Uint8Array)) {
-      throw new Error("Data should be a Uint8Array.")
-    }
-
     const output = new Uint8Array(data.length)
 
     for (let i = 0; i < data.length; i++) {
@@ -170,51 +192,49 @@ class Trivium {
 
   /**
    * This rekeys the Trivium cipher for use as an RNG. Keyboard entropy is
-   * colleced into a 10-byte entropy pool. Once the pool is filled, an 80-bit
-   * key is generated to rekey the Trivium state directly. There are 13 total
-   * bytes being collected by the keyboard:
+   * colleced into a 10-byte entropy pool. Once the pool is filled, a counter is
+   * encrypted and combined with each byte in the entropy pool to rekey Trivium.
+   * There are 13 total bytes being collected by the keyboard:
    *  - 1 key value byte
    *  - 6 key press timestamp bytes
    *  - 6 key release timestamp bytes
    * Because 13 is relatively prime to 10, each of the 13 keyboard bytes will
-   * see all 64 positions in the pool if the user types long enough. Thus for
-   * mixing, the pool bytes are XORed with the collected bytes.
-   * @param {Uint8Array} data - An array of unsigned 8-bit integers.
+   * see all 10 positions in the pool if the user types long enough. For mixing,
+   * the pool bytes are XORed with the collected bytes.
    */
-  #rekey(data) {
-    for (let i = 0; i < data.length; i++) {
-      this.#pool[this.#poolpos] ^= data[i]
-      this.#poolpos++
+  #rekey() {
+    const k = []
 
-      if (this.#poolpos === 10) {
-        for (let j = 0; j < 80; j += 8) {
-          this.#state[j + 0] = (this.#pool[j >> 3] >> 7) & 0x01
-          this.#state[j + 1] = (this.#pool[j >> 3] >> 6) & 0x01
-          this.#state[j + 2] = (this.#pool[j >> 3] >> 5) & 0x01
-          this.#state[j + 3] = (this.#pool[j >> 3] >> 4) & 0x01
-          this.#state[j + 4] = (this.#pool[j >> 3] >> 3) & 0x01
-          this.#state[j + 5] = (this.#pool[j >> 3] >> 2) & 0x01
-          this.#state[j + 6] = (this.#pool[j >> 3] >> 1) & 0x01
-          this.#state[j + 7] = (this.#pool[j >> 3] >> 0) & 0x01
-        }
+    for (let i = 0; i < 10; i++) {
+      const byte = this.#update(new Uint8Array([this.#counter + i])) ^ this.#pool[i]
+      const bits = this.#byteToBits(byte)
 
-        this.#poolpos = 0
+      for (let j = 0; j < 8; j++) {
+        k.push(bits[j])
       }
+    }
+
+    for (let i = 0; i < 80; i++) {
+      this.#state[i] = k[i]
     }
   }
 
   /**
-   * This is encryption while ignoring the returned ciphertext as we're not
-   * interested in decrypting anything. It is coupled with the squeeze()
-   * function to provide a consistent API with Spritz while being used in
-   * PassGen3. The absorb() and squeeze() functions here are a hack using the
-   * Trivium stream cipher to behave like a sponge. However, this does not turn
-   * Trivium into a true sponge construction.
+   * This function is is coupled with the squeeze() function to provide a
+   * consistent API with Spritz while being used in PassGen3. The absorb() and
+   * squeeze() functions here are a hack using the ChaCha stream cipher to
+   * behave like a sponge. However, this does not turn ChaCha into a true sponge
+   * construction.
    * @param {Uint8Array} data - An array of unsigned 8-bit integers.
    */
   absorb(data) {
     this.#update(data)
-    this.#rekey(data)
+
+    for (let i = 0; i < data.length; i++) {
+      this.#pool[this.#counter++ % 10] ^= data[i]
+    }
+
+    this.#rekey()
   }
 
   /**
@@ -229,10 +249,9 @@ class Trivium {
    */
   squeeze(r) {
     const p = new Uint8Array(r)
-    const output = []
 
     for (let i = 0; i < r; i++) {
-      p[i] = this.#update(new Uint8Array([i]))
+      p[i] = this.#update(new Uint8Array([this.#counter + i]))
     }
 
     return Array.from(p)

@@ -12,6 +12,22 @@ class Spritz {
 
   /** Initialize Spritz to its standard initial state. Hard-coded to N=256. */
   constructor() {
+    const now = Date.now()
+    const perf = performance.now() >>> 0
+
+    const high = Math.trunc(now / 0x1_0000_0000) // Upper 32-bits
+    const low = (now & 0xffffffff) >>> 0  // Lower 32-bits
+
+    // Date.now() in milliseconds since Jan 1, 1970 00:00:00 is 48-bits long.
+    const t = [
+       (high >>  8) & 0xff, high & 0xff,
+       (low >> 24) & 0xff, (low >> 24) & 0xff, (low >>  8) & 0xff, low & 0xff,
+    ]
+
+    const p = [
+      (perf >> 24) & 0xff, (perf >> 16) & 0xff, (perf >> 8) & 0xff, perf & 0xff
+    ]
+
     this.#a = 0
     this.#i = 0
     this.#j = 0
@@ -19,6 +35,10 @@ class Spritz {
     this.#w = 1
     this.#z = 0
     this.#S = Array.from(Array(256), (_, v) => v)
+
+    this.absorb(t)
+    this.absorb(p)
+    this.absorbStop()
   }
 
   /**
@@ -35,6 +55,7 @@ class Spritz {
    */
   set state(s) {
     if (
+      s instanceof Array && // Ensure the supplied state is an Array data type.
       Math.min(...s) === 0 && // Ensure the smallest number is 0.
       Math.max(...s) === 255 && // Ensure the largest number is 255.
       [...new Set(s)].length === 256 && // Ensure 256 array elements.
@@ -42,8 +63,8 @@ class Spritz {
     ) {
       this.#S = s
     } else {
-      console.error(
-          'Invalid state. Must be an array of 256 unique integers 0-255.'
+      throw new Error(
+        "Invalid state. Must be an array of 256 unique integers 0-255."
       )
     }
   }

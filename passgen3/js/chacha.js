@@ -6,62 +6,27 @@ class ChaCha {
   #keypos     // Pointer in the byte keystream.
   #keystream  // ChaCha keystream array.
   #state      // ChaCha state array.
-  #poolpos    // Pointer in the entropy pool.
   #pool       // Keyboard entropy pool.
+  #pointer    // Pointer in the entropy pool.
 
-  /** 
-   * Initialize initial state of ChaCha with key, nonce, counter, and rounds.
-   * @param{Uint32Array} key - A 32-bit array of 8 unsigned integers.
-   * @param{Uint32Array} nonce - A 32-bit array of 3 unsigned integers.
-   * @param{number} counter - An unsigned 32-bit integer.
-   * @throws {Error}
-   */
-  constructor(key, nonce, counter, rounds) {
-    if (typeof key === "undefined") {
-      // RFC 8439 test vector key
-      key = new Uint32Array([
-        0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
-        0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c
-      ])
-    }
+  /** Initialize initial state of ChaCha with key, nonce, pointer, and rounds. */
+  constructor() {
+    const nonce = [
+      Math.trunc(Date.now() / 0x1_0000_0000), // Upper 32-bits
+      (Date.now() & 0xffffffff) >>> 0, // Lower 32-bits
+      performance.now() >>> 0 // Rolls over after ~49.71 days of uptime.
+    ]
 
-    if (typeof counter === "undefined") {
-      // RFC 8439 test vector counter
-      counter = 1
-    }
-
-    if (typeof nonce === "undefined") {
-      // RFC 8439 test vector nonce
-      nonce = new Uint32Array([0x00000000, 0x4a000000, 0x00000000])
-    }
-
-    if (typeof rounds === "undefined") {
-      // https://eprint.iacr.org/2019/1492
-      rounds = 8
-    }
-
-    if (!(key instanceof Uint32Array)) {
-      throw new Error("Key should be an 8-element Uint32Array.")
-    }
-
-    if (!(nonce instanceof Uint32Array)) {
-      throw new Error("Nonce should be a 3-element Uint32Array.")
-    }
-
-    if (!Number.isInteger(rounds) || (rounds & 0x1) === 1 || rounds < 8) {
-      throw new Error("Rounds must be an even number no smaller than 8.")
-    }
-
-    this.#rounds = rounds
+    this.#rounds = 8
     this.#keypos = 0
     this.#keystream = Array.from(Array(64), (_, i) => 0)
-    this.#pool = new Uint8Array(64)
-    this.#poolpos = 0
+    this.#pool = new Uint8Array(32)
+    this.#pointer = 0
     this.#state = [
       0x61707865, 0x3320646e, 0x79622d32, 0x6b206574, // "expand 32-byte k"
-      key[0],     key[1],     key[2],     key[3],
-      key[4],     key[5],     key[6],     key[7],
-      counter,    nonce[0],   nonce[1],   nonce[2]
+      0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, // RFC 8439 test vector key
+      0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c, // RFC 8439 test vector key
+      0x00000001,   nonce[0],   nonce[1],   nonce[2]  // Counter and time-based nonce
     ]
   }
 
@@ -71,6 +36,36 @@ class ChaCha {
    */
   get state() {
     return this.#state
+  }
+
+  /**
+   * Set the ChaCha state.
+   * @param {Array} s - An array of 16 32-byte integers.
+   */
+  set state(s) {
+    if (
+      s instanceof Array && // Ensure array argument.
+      s.length === 16 && // Ensure 16 array elements.
+      s.filter(Number.isInteger).length === 16 // Ensure 16 numbers.
+    ) {
+      // Clamp constants per spec to "expand 32-byte k", regardless.
+      s[0] = 0x61707865
+      s[1] = 0x3320646e
+      s[2] = 0x79622d32
+      s[3] = 0x6b206574
+
+      // Force 32-bit unsigned values for the rest of the state.
+      for (let i = 4; i < 16; i++) {
+          s[i] &= 0xffffffff
+          s[i] >>>= 0
+      }
+
+      this.#state = s
+    } else {
+      throw new Error(
+        "Invalid state. Must be an array of 16 32-byte integers."
+      )
+    }
   }
 
   /**
@@ -153,16 +148,13 @@ class ChaCha {
   }
 
   /**
-   * Encrypt and decrypt data
+   * Encrypting and decrypting data is done by applying XOR to the data and
+   * ChaCha keystream.
    * @param {Uint8Array} data - Array of data to XOR with the keystream.
    * @return {Uint8Array} output - Array of plaintext or ciphertext.
    * @throws {Error}
    */
   #update(data) {
-    if (!(data instanceof Uint8Array)) {
-      throw new Error("Data should be a Uint8Array.")
-    }
-
     const output = new Uint8Array(data.length)
 
     for (let i = 0; i < data.length; i++) {
@@ -181,49 +173,50 @@ class ChaCha {
 
   /**
    * This rekeys the ChaCha cipher for use as an RNG. Keyboard entropy is
-   * colleced into a 64-byte entropy pool. Once the pool is filled, eight 32-bit
-   * keys are generated to rekey the ChaCha state directly. There are 13 total
-   * bytes being collected by the keyboard:
+   * colleced into a 32-byte entropy pool. Once the pool is filled, a counter is
+   * encrypted and combined with each byte in the entropy pool to rekey ChaCha.
+   * There are 13 total bytes being collected by the keyboard:
    *  - 1 key value byte
    *  - 6 key press timestamp bytes
    *  - 6 key release timestamp bytes
-   * Because 13 is relatively prime to 64, each of the 13 keyboard bytes will
-   * see all 64 positions in the pool if the user types long enough. Thus for
-   * mixing, the pool bytes are XORed with the collected bytes.
-   * @param {Uint8Array} data - An array of unsigned 8-bit integers.
+   * Because 13 is relatively prime to 32, each of the 13 keyboard bytes will
+   * see all 32 positions in the pool if the user types long enough. For mixing,
+   * the pool bytes are XORed with the collected bytes.
    */
-  #rekey(data) {
-    for (let i = 0; i < data.length; i++) {
-      this.#pool[this.#poolpos] ^= data[i]
-      this.#poolpos++
+  #rekey() {
+    const k = []
 
-      if (this.#poolpos === 64) {
-        for (let j = 0; j < 8; j++) {
-          this.#state[j + 4] = 
-            this.#pool[j * 4] |
-            this.#pool[j * 4 + 1] << 8 |
-            this.#pool[j * 4 + 2] << 16 |
-            this.#pool[j * 4 + 3] << 24
+    for (let i = 0; i < 32; i += 4) {
+      const k0 = this.#update(new Uint8Array([this.#pointer + i])) ^ this.#pool[i]
+      const k1 = this.#update(new Uint8Array([this.#pointer + i + 1])) ^ this.#pool[i + 1]
+      const k2 = this.#update(new Uint8Array([this.#pointer + i + 2])) ^ this.#pool[i + 2]
+      const k3 = this.#update(new Uint8Array([this.#pointer + i + 3])) ^ this.#pool[i + 3]
 
-          this.#state[j + 4] >>>= 0
-        }
-        this.#poolpos = 0
-      }
+      k.push(k0 | (k1 << 8) | (k2 << 16) | (k3 << 24))
+    }
+
+    for (let i = 0; i < 8; i++) {
+      this.#state[i + 4] = k[i]
+      this.#state[i + 4] >>>= 0
     }
   }
 
   /**
-   * This is encryption while ignoring the returned ciphertext as we're not
-   * interested in decrypting anything. It is coupled with the squeeze()
-   * function to provide a consistent API with Spritz while being used in
-   * PassGen3. The absorb() and squeeze() functions here are a hack using the
-   * ChaCha stream cipher to behave like a sponge. However, this does not turn
-   * ChaCha into a true sponge construction.
+   * This function is is coupled with the squeeze() function to provide a
+   * consistent API with Spritz while being used in PassGen3. The absorb() and
+   * squeeze() functions here are a hack using the ChaCha stream cipher to
+   * behave like a sponge. However, this does not turn ChaCha into a true sponge
+   * construction.
    * @param {Uint8Array} data - An array of unsigned 8-bit integers.
    */
   absorb(data) {
     this.#update(data)
-    this.#rekey(data)
+
+    for (let i = 0; i < data.length; i++) {
+      this.#pool[this.#pointer++ & 0x1f] ^= data[i]
+    }
+
+    this.#rekey()
   }
 
   /**
@@ -238,10 +231,9 @@ class ChaCha {
    */
   squeeze(r) {
     const p = new Uint8Array(r)
-    const output = []
 
     for (let i = 0; i < r; i++) {
-      p[i] = this.#update(new Uint8Array([i]))
+      p[i] = this.#update(new Uint8Array([this.#pointer + i]))
     }
 
     return Array.from(p)
