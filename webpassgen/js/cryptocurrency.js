@@ -109,14 +109,16 @@ function generateBitcoin(selection) {
 function generateMonero(selection) {
   /**
    * Calculate the CRC32 of a string.
+   * https://gist.github.com/lenqwang/1be7b4843a580f2c1df84d5360e5e88c
    * @param {string} string - The string to calculate.
    * @returns {number} A 32-bit integer.
    */
   var crc32 = function (str) {
-    // https://gist.github.com/lenqwang/1be7b4843a580f2c1df84d5360e5e88c
     let crc = 0 ^ -1
     const crcTable = []
+    const encoder = new TextEncoder()
 
+    // Build the CRC32 table.
     for (let i = 0; i < 256; i++) {
       let c = i
 
@@ -127,6 +129,9 @@ function generateMonero(selection) {
       crcTable[i] = c
     }
 
+    // Encode the string as raw bytes.
+    str = String.fromCharCode(...encoder.encode(str))
+
     for (let i = 0; i < str.length; i++) {
       crc = (crc >>> 8) ^ crcTable[(crc ^ str.charCodeAt(i)) & 0xff]
     }
@@ -136,12 +141,15 @@ function generateMonero(selection) {
 
   let pass = ''
   let wordList = ''
+  let prefixLen = 4 // Common for most languages below
 
   if (selection === 'Chinese') {
+    prefixLen = 1
     wordList = moneroCN
   } else if (selection === 'Dutch') {
     wordList = moneroNL
   } else if (selection === 'English') {
+    prefixLen = 3
     wordList = moneroEN
   } else if (selection === 'Esperanto') {
     wordList = moneroEO
@@ -152,6 +160,7 @@ function generateMonero(selection) {
   } else if (selection === 'Italian') {
     wordList = moneroIT
   } else if (selection === 'Japanese') {
+    prefixLen = 3
     wordList = moneroJP
   } else if (selection === 'Lojban') {
     wordList = moneroJBO
@@ -168,12 +177,12 @@ function generateMonero(selection) {
   const entropy = Math.ceil(getEntropy() / 32) * 32 // Multiple of 32 bits
   const len = Math.ceil(entropy / Math.log2(wordList.length))
 
-  pass = generatePass(len, wordList, true, cryptoProps.entropyCheck.checked).split(' ')
+  pass = generatePass(len, wordList, true, cryptoProps.entropyCheck.checked).trim().split(' ')
 
   let prefixes = ''
 
   for (let i = 0; i < pass.length; i++) {
-    prefixes += pass[i].substring(0, 3)
+    prefixes += pass[i].substring(0, prefixLen)
   }
 
   const checksum = crc32(prefixes)
