@@ -1,0 +1,30 @@
+body {
+  display: block;
+  margin: 8px;
+}
+
+#container {
+  margin: 0 auto;
+  width: 768px;
+}
+
+#content {
+  display: table;
+  margin-top: 10px;
+}
+
+.cell {
+  border: 1px solid black;
+  border-radius: 5px;
+  display: table-cell;
+  float: left;
+  height: 210px;
+  margin: 5px;
+  position: relative;
+  vertical-align: middle;
+  width: 372px;
+}
+
+.clear {
+  clear: both;
+}
