@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>visual KeePass Key File Generator</title>
+    <style>
+      .dot {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 50%;
+        display: inline-block;
+        height: 25px;
+        margin-bottom: -4px;
+        width: 25px;
+      }
+      .black {
+        background-color: black;
+      }
+      .break {
+          flex-basis: 100%;
+          height: 0;
+      }
+      .rotate90 {
+        transform: rotate(90deg);
+      }
+      .rotate180 {
+        transform: rotate(180deg);
+      }
+      .rotate270 {
+        transform: rotate(270deg);
+      }
+      #container {
+        margin: 0 auto;
+        width: 637px;
+      }
+      #tileTable {
+        border-collapse: separate;
+        border-spacing: 1px;
+        display: table;
+      }
+      #tableBody {
+        display: table-row-group;
+      }
+      .tableRow {
+        display: table-row
+      }
+      .tableCell {
+        background-color: #f3e2cf;
+        border: 2px solid black;
+        border-radius: 15%;
+        color: black;
+        display: table-cell;
+        padding: 10px;
+        vertical-align: middle;
+        height: 81px;
+        width: 81px;
+      }
+    </style>
+    <script src='js/html2canvas.min.js'></script>
+    <script>
+
+      function secRand (count) {
+        const min = (-count >>> 0) % count;
+        const rand = new Uint32Array(1);
+        const crypto = window.crypto || window.msCrypto;
+
+        do { crypto.getRandomValues(rand); } while (rand[0] < min);
+
+        return rand[0] % count;
+      }
+      function shuffleTiles (tiles) {
+        for (let i = 0; i < tiles.length; i++) {
+          const randInt = secRand(tiles.length);
+          const tmp = tiles[randInt];
+          tiles[randInt] = tiles[i];
+          tiles[i] = tmp;
+        }
+        return tiles;
+      }
+      function resetCells () {
+        for (let i = 0; i < 36; i++) {
+          const cell = document.getElementById('cell' + i);
+
+          for (let i = 0; i < 9; i++) cell.removeChild(cell.childNodes[0]);
+        }
+      }
+      function rotateCells () {
+        for (let i = 0; i < 36; i++) {
+          const cell = document.getElementById('cell' + i);
+          const randInt = secRand(4);
+
+          if (randInt === 0) {
+            cell.setAttribute('class', 'tableCell');
+          } else if (randInt === 1) {
+            cell.setAttribute('class', 'tableCell');
+            cell.classList.add('rotate90');
+          } else if (randInt === 2) {
+            cell.setAttribute('class', 'tableCell');
+            cell.classList.add('rotate180');
+          } else {
+            cell.setAttribute('class', 'tableCell');
+            cell.classList.add('rotate270');
+          }
+        }
+      }
+
+      function drawDots () {
+        // https://redd.it/km1gfh/
+        const tiles = shuffleTiles(
+          [[ 1,  97], [ 2,  98], [ 3,  99], [ 5, 101], [ 6, 102], [ 7, 103],
+           [10, 105], [11, 106], [12, 107], [13, 109], [14, 110], [15, 111],
+           [17, 113], [18, 114], [19, 115], [21, 117], [22, 118], [23, 119],
+           [26, 121], [27, 122], [28, 123], [29, 125], [30, 126], [31, 127],
+           [33, 141], [35, 142], [37, 143], [39, 157], [41, 158], [42, 159],
+           [43, 171], [44, 173], [45, 175], [46, 187], [47, 189], [49, 191],
+           [51, 197], [53, 199], [55, 205], [57, 206], [58, 207], [59, 213],
+           [60, 215], [61, 221], [62, 222], [63, 223], [69, 229], [70, 231],
+           [71, 237], [76, 239], [77, 245], [78, 247], [79, 253], [85, 255],
+           [86, 327], [87, 335], [92, 343], [93, 351], [94, 367], [95, 383]]
+        );
+
+        for (let i = 0; i < 36; i++) {
+          let tile;
+          const cell = document.getElementById('cell' + i);
+
+          if (secRand(2) === 0) tile = tiles[i][0].toString(2).padStart(9, '0');
+          else tile = tiles[i][1].toString(2).padStart(9, '0');
+
+          for (let i = 0; i < 9; i++) {
+            const newSpan = document.createElement('span');
+            newSpan.setAttribute('class', 'dot');
+            if (tile[i] === '1') newSpan.classList.add('black');
+            cell.appendChild(newSpan);
+          }
+        }
+        rotateCells();
+      }
+      window.onload = function () {
+        drawDots();
+      };
+    </script>
+  </head>
+  <body>
+    <div id='container'>
+      <h1>Visual KeePass Key Files</h1>
+      <p>The <a href="https://keepass.info">KeePass password manager</a> and many variants <a href="https://keepass.info/help/base/keys.html#keyfiles">support key files</a> to enhance the security of your encrypted vault. It's usually an XML file with builtin hash integrity or just a 128-byte binary file. But this is boring.</p>
+      <p>KeePass, KeePassXC, and many others support any file type. So long as the file is unique and sufficiently secure to be used as a secret cryptographic key, it'll work. So why not have some fun with it?</p>
+      <p>Below is a random selection of 36 <a href="https://github.com/nsg21/PasswordRunes">Password Runes</a> from 60 double-sided tiles. Each rune is designed to remain unique under rotation. It has <tt>log2(2^36 × 4^36 × 60!/(60-36)!) ~= 301 bits</tt> of symmetric security, suitable for 256-bit cryptographic keys. As such, saved as an image, this can work as a secure and fun KeePass key file.</p>
+      <p>Right-click to save image.</p>
+      <div id='tileTable'>
+        <div id='tableBody'>
+          <div class='tableRow'>
+            <div id='cell0' class='tableCell'></div>
+            <div id='cell1' class='tableCell'></div>
+            <div id='cell2' class='tableCell'></div>
+            <div id='cell3' class='tableCell'></div>
+            <div id='cell4' class='tableCell'></div>
+            <div id='cell5' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell6' class='tableCell'></div>
+            <div id='cell7' class='tableCell'></div>
+            <div id='cell8' class='tableCell'></div>
+            <div id='cell9' class='tableCell'></div>
+            <div id='cell10' class='tableCell'></div>
+            <div id='cell11' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell12' class='tableCell'></div>
+            <div id='cell13' class='tableCell'></div>
+            <div id='cell14' class='tableCell'></div>
+            <div id='cell15' class='tableCell'></div>
+            <div id='cell16' class='tableCell'></div>
+            <div id='cell17' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell18' class='tableCell'></div>
+            <div id='cell19' class='tableCell'></div>
+            <div id='cell20' class='tableCell'></div>
+            <div id='cell21' class='tableCell'></div>
+            <div id='cell22' class='tableCell'></div>
+            <div id='cell23' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell24' class='tableCell'></div>
+            <div id='cell25' class='tableCell'></div>
+            <div id='cell26' class='tableCell'></div>
+            <div id='cell27' class='tableCell'></div>
+            <div id='cell28' class='tableCell'></div>
+            <div id='cell29' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell30' class='tableCell'></div>
+            <div id='cell31' class='tableCell'></div>
+            <div id='cell32' class='tableCell'></div>
+            <div id='cell33' class='tableCell'></div>
+            <div id='cell34' class='tableCell'></div>
+            <div id='cell35' class='tableCell'></div>
+          </div>
+        </div> <!-- tableBody -->
+      </div> <!-- tileTable -->
+      <div class='break'></div>
+      <button onclick='resetCells(); drawDots()'>Generate New</button>
+    </div> <!-- container -->
+    <script>
+      function save() {
+        const elementToSave = document.querySelector("#tableBody");
+
+        document.addEventListener("contextmenu", () => {
+          html2canvas(elementToSave).then(canvas => {
+            const a = document.createElement("a");
+            a.href = canvas.toDataURL("image/png");
+            a.download = "keyfile.png";
+            a.click();
+          });
+        });
+      }
+
+      save();
+    </script>
+  </body>
+</html>
