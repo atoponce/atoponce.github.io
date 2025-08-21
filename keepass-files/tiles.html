@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Visual KeePass Key File Generator</title>
+    <style>
+      .dot {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 50%;
+        display: inline-block;
+        height: 25px;
+        margin-bottom: -4px;
+        width: 25px;
+      }
+      .black {
+        background-color: black;
+      }
+      .break {
+          flex-basis: 100%;
+          height: 0;
+      }
+      #container {
+        margin: 0 auto;
+        width: 1275px;
+      }
+      #tileTable {
+        border-collapse: separate;
+        border-spacing: 1px;
+        display: table;
+      }
+      #tableBody {
+        display: table-row-group;
+      }
+      .tableRow {
+        display: table-row
+      }
+      .tableCell {
+        background-color: #f3e2cf;
+        border: 2px solid black;
+        border-radius: 15%;
+        color: black;
+        display: table-cell;
+        padding: 10px;
+        vertical-align: middle;
+        height: 81px;
+        width: 81px;
+      }
+    </style>
+    <script>
+      function drawDots () {
+        // https://redd.it/km1gfh/
+        const tiles = [
+            [  1, 510], [  2, 509], [  3, 508], [  5, 506], [  6, 505], [  7, 504],
+            [ 10, 501], [ 11, 500], [ 12, 499], [ 13, 498], [ 14, 497], [ 15, 496], 
+            [ 17, 494], [ 18, 493], [ 19, 492], [ 21, 490], [ 22, 489], [ 23, 488], 
+            [ 26, 485], [ 27, 484], [ 28, 483], [ 29, 482], [ 30, 481], [ 33, 478], 
+            [ 35, 476], [ 37, 474], [ 39, 472], [ 41, 470], [ 42, 469], [ 43, 468], 
+            [ 44, 467], [ 45, 466], [ 46, 465], [ 49, 462], [ 51, 460], [ 53, 458], 
+            [ 57, 454], [ 58, 453], [ 59, 452], [ 60, 451], [ 61, 450], [ 62, 449], 
+            [ 69, 442], [ 70, 441], [ 76, 435], [ 78, 433], [ 85, 426], [ 86, 425], 
+            [ 92, 419], [ 94, 417], [ 97, 414], [ 98, 413], [ 99, 412], [101, 410], 
+            [106, 405], [113, 398], [114, 397], [141, 370], [142, 369], [158, 353]
+        ]
+
+        for (let i = 0; i < 120; i++) {
+          let tile;
+          const cell = document.getElementById('cell' + i);
+
+          if (i < 60) {
+            tile = tiles[i][0].toString(2).padStart(9, '0');
+          } else {
+            tile = tiles[i - 60][1].toString(2).padStart(9, '0');
+          }
+
+          for (let i = 0; i < 9; i++) {
+            const newSpan = document.createElement('span');
+            newSpan.setAttribute('class', 'dot');
+            if (tile[i] === '1') newSpan.classList.add('black');
+            cell.appendChild(newSpan);
+          }
+        }
+      }
+      window.onload = function () {
+        drawDots();
+      };
+    </script>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Visual KeePass Key File Security</h1>
+      <p>These are at most 120 possible tiles using 9 bits that remain unique under rotation. Double-sided gives us a total 60 tiles to pick from. The algorithm for generating a KeePass key file is as follows:</p>
+      <p>Randomly:</p>
+      <ol>
+        <li>Pick 36 of the 60 double-sided tiles = 60 permute 36 = 60!/(60-36)!.</li>
+        <li>Flip each of the 36 tiles to pick a side = 2^36.</li>
+        <li>Rotate each of the 36 tiles 0, 90, 180, or 270 degrees = 4^36.</li>
+      </ol>
+      <p>This gives us a total of 2^36 × 4^36 × 60!/(60-36)! possibilities, or a symmetric security of 301 bits. KeePass and KeePassXC will hash the key file with SHA-256. As such, we can guarantee a symmetric security for your password vault of at least 256 bits, regardless of the strength of your master password.</p>
+      <p>Side A and Side B are exclusive-or to each other, thus creating a perfect "heads" and "tails" pattern.</p>
+      <div id='tileTable'>
+        <div id='tableBody'>
+          <h3>Side A:</h3>
+          <div class='tableRow'>
+            <div id='cell0' class='tableCell'></div>
+            <div id='cell1' class='tableCell'></div>
+            <div id='cell2' class='tableCell'></div>
+            <div id='cell3' class='tableCell'></div>
+            <div id='cell4' class='tableCell'></div>
+            <div id='cell5' class='tableCell'></div>
+            <div id='cell6' class='tableCell'></div>
+            <div id='cell7' class='tableCell'></div>
+            <div id='cell8' class='tableCell'></div>
+            <div id='cell9' class='tableCell'></div>
+            <div id='cell10' class='tableCell'></div>
+            <div id='cell11' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell12' class='tableCell'></div>
+            <div id='cell13' class='tableCell'></div>
+            <div id='cell14' class='tableCell'></div>
+            <div id='cell15' class='tableCell'></div>
+            <div id='cell16' class='tableCell'></div>
+            <div id='cell17' class='tableCell'></div>
+            <div id='cell18' class='tableCell'></div>
+            <div id='cell19' class='tableCell'></div>
+            <div id='cell20' class='tableCell'></div>
+            <div id='cell21' class='tableCell'></div>
+            <div id='cell22' class='tableCell'></div>
+            <div id='cell23' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell24' class='tableCell'></div>
+            <div id='cell25' class='tableCell'></div>
+            <div id='cell26' class='tableCell'></div>
+            <div id='cell27' class='tableCell'></div>
+            <div id='cell28' class='tableCell'></div>
+            <div id='cell29' class='tableCell'></div>
+            <div id='cell30' class='tableCell'></div>
+            <div id='cell31' class='tableCell'></div>
+            <div id='cell32' class='tableCell'></div>
+            <div id='cell33' class='tableCell'></div>
+            <div id='cell34' class='tableCell'></div>
+            <div id='cell35' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell36' class='tableCell'></div>
+            <div id='cell37' class='tableCell'></div>
+            <div id='cell38' class='tableCell'></div>
+            <div id='cell39' class='tableCell'></div>
+            <div id='cell40' class='tableCell'></div>
+            <div id='cell41' class='tableCell'></div>
+            <div id='cell42' class='tableCell'></div>
+            <div id='cell43' class='tableCell'></div>
+            <div id='cell44' class='tableCell'></div>
+            <div id='cell45' class='tableCell'></div>
+            <div id='cell46' class='tableCell'></div>
+            <div id='cell47' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell48' class='tableCell'></div>
+            <div id='cell49' class='tableCell'></div>
+            <div id='cell50' class='tableCell'></div>
+            <div id='cell51' class='tableCell'></div>
+            <div id='cell52' class='tableCell'></div>
+            <div id='cell53' class='tableCell'></div>
+            <div id='cell54' class='tableCell'></div>
+            <div id='cell55' class='tableCell'></div>
+            <div id='cell56' class='tableCell'></div>
+            <div id='cell57' class='tableCell'></div>
+            <div id='cell58' class='tableCell'></div>
+            <div id='cell59' class='tableCell'></div>
+          </div>
+          <h3>Side B:</h3>
+          <div class='tableRow'>
+            <div id='cell60' class='tableCell'></div>
+            <div id='cell61' class='tableCell'></div>
+            <div id='cell62' class='tableCell'></div>
+            <div id='cell63' class='tableCell'></div>
+            <div id='cell64' class='tableCell'></div>
+            <div id='cell65' class='tableCell'></div>
+            <div id='cell66' class='tableCell'></div>
+            <div id='cell67' class='tableCell'></div>
+            <div id='cell68' class='tableCell'></div>
+            <div id='cell69' class='tableCell'></div>
+            <div id='cell70' class='tableCell'></div>
+            <div id='cell71' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell72' class='tableCell'></div>
+            <div id='cell73' class='tableCell'></div>
+            <div id='cell74' class='tableCell'></div>
+            <div id='cell75' class='tableCell'></div>
+            <div id='cell76' class='tableCell'></div>
+            <div id='cell77' class='tableCell'></div>
+            <div id='cell78' class='tableCell'></div>
+            <div id='cell79' class='tableCell'></div>
+            <div id='cell80' class='tableCell'></div>
+            <div id='cell81' class='tableCell'></div>
+            <div id='cell82' class='tableCell'></div>
+            <div id='cell83' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell84' class='tableCell'></div>
+            <div id='cell85' class='tableCell'></div>
+            <div id='cell86' class='tableCell'></div>
+            <div id='cell87' class='tableCell'></div>
+            <div id='cell88' class='tableCell'></div>
+            <div id='cell89' class='tableCell'></div>
+            <div id='cell90' class='tableCell'></div>
+            <div id='cell91' class='tableCell'></div>
+            <div id='cell92' class='tableCell'></div>
+            <div id='cell93' class='tableCell'></div>
+            <div id='cell94' class='tableCell'></div>
+            <div id='cell95' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell96' class='tableCell'></div>
+            <div id='cell97' class='tableCell'></div>
+            <div id='cell98' class='tableCell'></div>
+            <div id='cell99' class='tableCell'></div>
+            <div id='cell100' class='tableCell'></div>
+            <div id='cell101' class='tableCell'></div>
+            <div id='cell102' class='tableCell'></div>
+            <div id='cell103' class='tableCell'></div>
+            <div id='cell104' class='tableCell'></div>
+            <div id='cell105' class='tableCell'></div>
+            <div id='cell106' class='tableCell'></div>
+            <div id='cell107' class='tableCell'></div>
+          </div>
+          <div class='tableRow'>
+            <div id='cell108' class='tableCell'></div>
+            <div id='cell109' class='tableCell'></div>
+            <div id='cell110' class='tableCell'></div>
+            <div id='cell111' class='tableCell'></div>
+            <div id='cell112' class='tableCell'></div>
+            <div id='cell113' class='tableCell'></div>
+            <div id='cell114' class='tableCell'></div>
+            <div id='cell115' class='tableCell'></div>
+            <div id='cell116' class='tableCell'></div>
+            <div id='cell117' class='tableCell'></div>
+            <div id='cell118' class='tableCell'></div>
+            <div id='cell119' class='tableCell'></div>
+          </div>
+        </div> <!-- tableBody -->
+      </div> <!-- tileTable -->
+    </div> <!-- container -->
+  </body>

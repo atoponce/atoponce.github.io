@@ -108,18 +108,18 @@
 
       function drawDots () {
         // https://redd.it/km1gfh/
-        const tiles = shuffleTiles(
-          [[ 1,  97], [ 2,  98], [ 3,  99], [ 5, 101], [ 6, 102], [ 7, 103],
-           [10, 105], [11, 106], [12, 107], [13, 109], [14, 110], [15, 111],
-           [17, 113], [18, 114], [19, 115], [21, 117], [22, 118], [23, 119],
-           [26, 121], [27, 122], [28, 123], [29, 125], [30, 126], [31, 127],
-           [33, 141], [35, 142], [37, 143], [39, 157], [41, 158], [42, 159],
-           [43, 171], [44, 173], [45, 175], [46, 187], [47, 189], [49, 191],
-           [51, 197], [53, 199], [55, 205], [57, 206], [58, 207], [59, 213],
-           [60, 215], [61, 221], [62, 222], [63, 223], [69, 229], [70, 231],
-           [71, 237], [76, 239], [77, 245], [78, 247], [79, 253], [85, 255],
-           [86, 327], [87, 335], [92, 343], [93, 351], [94, 367], [95, 383]]
-        );
+        const tiles = shuffleTiles([
+          [  1, 510], [  2, 509], [  3, 508], [  5, 506], [  6, 505], [  7, 504],
+          [ 10, 501], [ 11, 500], [ 12, 499], [ 13, 498], [ 14, 497], [ 15, 496], 
+          [ 17, 494], [ 18, 493], [ 19, 492], [ 21, 490], [ 22, 489], [ 23, 488], 
+          [ 26, 485], [ 27, 484], [ 28, 483], [ 29, 482], [ 30, 481], [ 33, 478], 
+          [ 35, 476], [ 37, 474], [ 39, 472], [ 41, 470], [ 42, 469], [ 43, 468], 
+          [ 44, 467], [ 45, 466], [ 46, 465], [ 49, 462], [ 51, 460], [ 53, 458], 
+          [ 57, 454], [ 58, 453], [ 59, 452], [ 60, 451], [ 61, 450], [ 62, 449], 
+          [ 69, 442], [ 70, 441], [ 76, 435], [ 78, 433], [ 85, 426], [ 86, 425], 
+          [ 92, 419], [ 94, 417], [ 97, 414], [ 98, 413], [ 99, 412], [101, 410], 
+          [106, 405], [113, 398], [114, 397], [141, 370], [142, 369], [158, 353]
+        ]);
 
         for (let i = 0; i < 36; i++) {
           let tile;
@@ -147,7 +147,7 @@
       <h1>Visual KeePass Key Files</h1>
       <p>The <a href="https://keepass.info">KeePass password manager</a> and many variants <a href="https://keepass.info/help/base/keys.html#keyfiles">support key files</a> to enhance the security of your encrypted vault. It's usually an XML file with builtin hash integrity or just a 128-byte binary file. But this is boring.</p>
       <p>KeePass, KeePassXC, and many others support any file type. So long as the file is unique and sufficiently secure to be used as a secret cryptographic key, it'll work. So why not have some fun with it?</p>
-      <p>Below is a random selection of 36 <a href="https://github.com/nsg21/PasswordRunes">Password Runes</a> from 60 double-sided tiles. Each rune is designed to remain unique under rotation. It has <tt>log2(2^36 × 4^36 × 60!/(60-36)!) ~= 301 bits</tt> of symmetric security, suitable for 256-bit cryptographic keys. As such, saved as an image, this can work as a secure and fun KeePass key file.</p>
+      <p>Below is a random selection of 36 <a href="https://github.com/nsg21/PasswordRunes">Password Runes</a> from 60 double-sided tiles. See <a href="tiles.html">this security analysis</a> for more details.</p>
       <p>Right-click to save image.</p>
       <div id='tileTable'>
         <div id='tableBody'>
