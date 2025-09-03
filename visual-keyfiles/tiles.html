@@ -4,7 +4,7 @@
     <link rel="icon" href="favicon.png" type="image/png">
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Visual KeePass Key File Generator</title>
+    <title>Visual Keyfile Generator</title>
     <style>
       .dot {
         background-color: white;
@@ -90,15 +90,15 @@
   </head>
   <body>
     <div id="container">
-      <h1>Visual KeePass Key File Security</h1>
-      <p>These are at most 120 possible tiles using 9 bits that remain unique under rotation. Double-sided gives us a total 60 tiles to pick from. The algorithm for generating a KeePass key file is as follows:</p>
+      <h1>Visual Keyfile Security</h1>
+      <p>These are at most 120 possible tiles using 9 bits that remain unique under rotation. Double-sided gives us a total 60 tiles to pick from. The algorithm for generating a keyfile is as follows:</p>
       <p>Randomly:</p>
       <ol>
         <li>Pick 36 of the 60 double-sided tiles = 60 permute 36 = 60!/(60-36)!.</li>
         <li>Flip each of the 36 tiles to pick a side = 2^36.</li>
         <li>Rotate each of the 36 tiles 0, 90, 180, or 270 degrees = 4^36.</li>
       </ol>
-      <p>This gives us a total of 2^36 × 4^36 × 60!/(60-36)! possibilities, or a symmetric security of 301 bits. KeePass and KeePassXC will hash the key file with SHA-256. As such, we can guarantee a symmetric security for your password vault of at least 256 bits, regardless of the strength of your master password.</p>
+      <p>This gives us a total of 2^36 × 4^36 × 60!/(60-36)! possibilities, or a symmetric security of 301 bits. The keyfile will usually be hashed with SHA-256. Check the source code of the project to confirm. As such, we can guarantee a symmetric security of at least 256 bits, regardless of the strength of your master password.</p>
       <p>Side A and Side B are exclusive-or to each other, thus creating a perfect "heads" and "tails" pattern.</p>
       <div id='tileTable'>
         <div id='tableBody'>
