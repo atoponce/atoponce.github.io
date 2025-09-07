@@ -39,6 +39,7 @@
         border-collapse: separate;
         border-spacing: 1px;
         display: table;
+        margin-top: 5px;
       }
       #tableBody {
         display: table-row-group;
@@ -150,6 +151,7 @@
       <p>So long as the file is unique and sufficiently secure to be used as a secret cryptographic key, it'll work. So why not have some fun with it?</p>
       <p>Below is a random selection of 36 <a href="https://github.com/nsg21/PasswordRunes">Password Runes</a> from 60 double-sided tiles. See <a href="tiles.html">this security analysis</a> for more details.</p>
       <p>Right-click to save image.</p>
+      <button onclick='resetCells(); drawDots()'>Generate New</button>
       <div id='tileTable'>
         <div id='tableBody'>
           <div class='tableRow'>
@@ -203,7 +205,6 @@
         </div> <!-- tableBody -->
       </div> <!-- tileTable -->
       <div class='break'></div>
-      <button onclick='resetCells(); drawDots()'>Generate New</button>
     </div> <!-- container -->
     <script>
       function save() {
