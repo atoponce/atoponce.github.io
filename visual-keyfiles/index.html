@@ -151,7 +151,7 @@
       <p>So long as the file is unique and sufficiently secure to be used as a secret cryptographic key, it'll work. So why not have some fun with it?</p>
       <p>Below is a random selection of 36 <a href="https://github.com/nsg21/PasswordRunes">Password Runes</a> from 60 double-sided tiles. See <a href="tiles.html">this security analysis</a> for more details.</p>
       <button onclick='resetCells(); drawDots()'>Generate New</button>
-      <button id="download">Download Image</button>
+      <button id="save">Save Image</button>
       <div id='tileTable'>
         <div id='tableBody'>
           <div class='tableRow'>
@@ -210,7 +210,7 @@
       function save() {
         const elementToSave = document.querySelector("#tableBody");
 
-        document.getElementById('download').addEventListener("click", () => {
+        document.getElementById('save').addEventListener("click", () => {
           html2canvas(elementToSave).then(canvas => {
             const a = document.createElement("a");
             a.href = canvas.toDataURL("image/png");
