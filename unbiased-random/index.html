@@ -21,7 +21,7 @@
     <body>
         <div id="container">
             <h1>Secure and Unbiased Random Number Generation</h1>
-            <p>The following code is both insecure and biased in generating random numbers:</p>
+            <p>The following code is both insecure and biased in generating random numbers for things like passwords:</p>
 <pre><code class="language-js">function prng(range) {
   return Math.floor(Math.random() * range); // This is bad and you should feel bad.
 }</code></pre>
@@ -51,7 +51,7 @@
             <p>Notice also that this generator is using the Web Crypto API by utilizing <code>crypto.getRandomValues()</code>. This will use your operating systems cryptographically secure random number generator. This output is indistinguishable from random noise and is exactly what we want for generating secure passwords.</p>
             <p>Let's put it in action:</p>
 <pre><code class="language-js">function generatePassword() {
-  let ascii = ""
+  let ascii = "";
   let password = "";
   
   for (let i = 33; i < 127; i++) {
