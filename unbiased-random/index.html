@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="theme.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script src="highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <style>
+            #container {
+                margin: 0 auto;
+                width: 800px;
+            }
+            .hljs {
+                display: block;
+                padding: 10px;
+            }
+        </style>
+        <title>Unbiased Random Number Generation</title>
+    </head>
+    <body>
+        <div id="container">
+            <h1>Secure and Unbiased Random Number Generation</h1>
+            <p>The following code is both insecure and biased in generating random numbers:</p>
+<pre><code class="language-js">function prng(range) {
+  return Math.floor(Math.random() * range); // This is bad and you should feel bad.
+}</code></pre>
+            <p>Why? Because <code>Math.random()</code> is not cryptographically secure and <code>range</code> is not guaranteed to divide <code>Math.random()</code> evenly.</p>
+            <p>What's happening exactly? Suppose you want to generate a password from all graphical ASCII characters. There are 94 such characters. Depending on your browser, <code>Math.random()</code> has either a 32-bit or 53-bit output space. In either case, 94 does not divide them evenly:</p>
+<pre><code class="language-js">> console.log(2**32 / 94);
+45691141.44680851
+> console.log(2**32 % 94);
+42
+> console.log(2**53 / 94);
+95821268667457.36
+> console.log(2**53 % 94);
+34</code></pre>
+            <p>Notice how we have a remainder in both cases. This means in the 32-bit generator, there are 52 values that will be generated one more time more than the other 42. In the case of the 53-bit generator, there are 60 values that will be generated one more time more than the other 34. This is unacceptiable for secure secrets such as passwords or cryptographic keys.</p>
+            <p>Let's fix it:</p>
+<pre><code class="language-js">function csprng(range) {
+  const min = (-range >>> 0) % range;
+  const rand = new Uint32Array(1);
+  
+  do {
+    crypto.getRandomValues(rand);
+  } while (rand[0] < min);
+  
+  return rand[0] % range;
+}</code></pre>
+            <p>In this code, we are setting an absolute minimum value for the generated random number. This minimum value ensures that the range of valid random numbers we can generate evenly divides 94. Anything less than that minimum value will be rejected, otherwise we can uniformily generate a random number.</p>
+            <p>Notice also that this generator is using the Web Crypto API by utilizing <code>crypto.getRandomValues()</code>. This will use your operating systems cryptographically secure random number generator. This output is indistinguishable from random noise and is exactly what we want for generating secure passwords.</p>
+            <p>Let's put it in action:</p>
+<pre><code class="language-js">function generatePassword() {
+  let ascii = ""
+  let password = "";
+  
+  for (let i = 33; i < 127; i++) {
+    ascii += String.fromCharCode(i);
+  }
+
+  for (let i = 0; i < 12; i++) {
+    password += ascii[csprng(ascii.length)];
+  }
+  
+  return password;
+}</code></pre>
+<pre><code class="language-js">> console.log(generatePassword());
+'Aw?^&]8Yl"J3'</code></pre>
+    </body>
+</html>
