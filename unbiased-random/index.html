@@ -47,8 +47,8 @@
   
   return rand[0] % range;
 }</code></pre>
-            <p>In this code, we are setting an absolute minimum value for the generated random number. This minimum value ensures that the range of valid random numbers we can generate evenly divides <code>range</code>, such as 94 in our previous example. Anything less than that minimum value will be rejected, otherwise we can uniformily generate a random number.</p>
-            <p>Notice also that this generator is using the Web Crypto API by utilizing <code>crypto.getRandomValues()</code>. This will use your operating systems cryptographically secure random number generator. This output is indistinguishable from random noise and is exactly what we want for generating secure passwords.</p>
+            <p>In this code, we are setting an absolute minimum value for the generated random number. This minimum value ensures that the random numbers we generate evenly divides <code>range</code>, such as 94 in our previous example. Anything less than that minimum value will be rejected, otherwise we can uniformily generate a random number.</p>
+            <p>Notice also that this generator is using the <a href="https://w3c.github.io/webcrypto/">Web Crypto API</a> by utilizing <code>crypto.getRandomValues()</code>. This will use your operating system's cryptographically secure random number generator. This output is indistinguishable from random noise and is exactly what we want for generating secure passwords.</p>
             <p>Let's put it in action:</p>
 <pre><code class="language-js">function generatePassword() {
   let ascii = "";
