@@ -21,7 +21,7 @@
     <body>
         <div id="container">
             <h1>Secure and Unbiased Random Number Generation</h1>
-            <p>The following code is both insecure and biased in generating random numbers for things like passwords:</p>
+            <p>The following code is both insecure and biased in generating secure randomness for things like passwords:</p>
 <pre><code class="language-js">function prng(range) {
   return Math.floor(Math.random() * range); // This is bad and you should feel bad.
 }</code></pre>
@@ -35,7 +35,7 @@
 95821268667457.36
 > console.log(2**53 % 94);
 34</code></pre>
-            <p>Notice how we have a remainder in both cases. This means in the 32-bit generator, there are 52 values that will be generated one more time more than the other 42. In the case of the 53-bit generator, there are 60 values that will be generated one more time more than the other 34. This is unacceptiable for secure secrets such as passwords or cryptographic keys.</p>
+            <p>Notice how we have a remainder in both cases. This means in the 32-bit generator, there are 52 values that will be generated one more time more than the other 42. In the case of the 53-bit generator, there are 60 values that will be generated one more time more than the other 34. This is unacceptable for secure secrets such as passwords or cryptographic keys.</p>
             <p>Let's fix it:</p>
 <pre><code class="language-js">function csprng(range) {
   const min = (-range >>> 0) % range;
@@ -47,19 +47,19 @@
   
   return rand[0] % range;
 }</code></pre>
-            <p>In this code, we are setting an absolute minimum value for the generated random number. This minimum value ensures that the random numbers we generate evenly divides <code>range</code>, such as 94 in our previous example. Anything less than that minimum value will be rejected, otherwise we can uniformily generate a random number.</p>
-            <p>Notice also that this generator is using the <a href="https://w3c.github.io/webcrypto/">Web Crypto API</a> by utilizing <code>crypto.getRandomValues()</code>. This will use your operating system's cryptographically secure random number generator. This output is indistinguishable from random noise and is exactly what we want for generating secure passwords.</p>
+            <p>In this code, we are setting an absolute minimum value for the generated random number. This minimum value ensures that the random numbers we generate evenly divides <code>range</code>, such as 94 in our previous example. Anything less than that minimum value will be rejected, otherwise we can uniformly generate a random number. See also "<a href="https://www.pcg-random.org/posts/bounded-rands.html">Efficiently Generating a Number in a Range</a>" by Dr. Melissa E. O'Neill.</p>
+            <p>Notice that this generator is using the <a href="https://w3c.github.io/webcrypto/">Web Crypto API</a> by utilizing <code>crypto.getRandomValues()</code>. This will use your operating system's cryptographically secure random number generator. This output is indistinguishable from random noise and is exactly what we want for generating secure passwords.</p>
             <p>Let's put it in action:</p>
 <pre><code class="language-js">function generatePassword() {
-  let ascii = "";
+  let ascii = new Set();
   let password = "";
   
   for (let i = 33; i < 127; i++) {
-    ascii += String.fromCharCode(i);
+    ascii.add(String.fromCharCode(i));
   }
 
   for (let i = 0; i < 12; i++) {
-    password += ascii[csprng(ascii.length)];
+    password += [...ascii][csprng(ascii.size)];
   }
   
   return password;
