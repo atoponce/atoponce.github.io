@@ -108,14 +108,16 @@
         }
 
         function streamColors() {
-          let coloredSpaces = "";
+          const coloredSpaces = [];
           const colors = toColors();
+          const l = colors.length;
+          const id = document.getElementById("trueRandom");
 
-          for (let i = 0; i < colors.length; i++) {
-            coloredSpaces += `<span style='background-color: ${colors[i]}'>&nbsp;</span>`
+          for (let i = 0; i < l; i++) {
+            coloredSpaces.push(`<span style='background-color: ${colors[i]}'>&nbsp;</span>`);
           }
 
-          document.getElementById('trueRandom').insertAdjacentHTML('afterbegin', coloredSpaces);
+          id.insertAdjacentHTML('afterbegin', coloredSpaces.join(''));
         }
 
         function startStream() {
