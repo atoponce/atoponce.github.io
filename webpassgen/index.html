@@ -36,12 +36,13 @@
       </div>
       <div id='content'>
 
+        <!-- Alternate -->
         <div id='alt-default' class='cell'>
           <span class='cell-title'><strong>Alternate</strong></span>
           <div class='optional'>
             <select id='alt-options'>
               <optgroup label='English'>
-                <option>Acronyms</option>
+                <option>Backronyms</option>
                 <option selected='selected'>Common Words Only</option>
                 <option>Every Word List</option>
                 <option disabled>――――――――――</option>
@@ -51,13 +52,13 @@
                 <option>Obscure</option>
                 <option>PGP</option>
                 <option>Pokerware</option>
-                <option>RockYou</option>
                 <option>Shavian Alphabet</option>
                 <option>Simpsons</option>
                 <option>S/KEY</option>
                 <option>Trump</option>
                 <option>Verb, Adjective, Noun</option>
                 <option>Wordle</option>
+                <option>zxcvbn</option>
               </optgroup>
               <optgroup label='Non-English'>
                 <option>Afrikaans</option>
@@ -94,6 +95,7 @@
           </div>
         </div>
 
+        <!-- Cryptocurrency -->
         <div id='crypto-default' class='cell'>
           <span class='cell-title'><strong>Cryptocurrency</strong></span>
           <div class='optional'>
@@ -150,6 +152,7 @@
           <div class='checksum'><span id='crypto-check'></span></div>
         </div>
 
+        <!-- Diceware -->
         <div id='diceware-default' class='cell'>
           <span class='cell-title'><strong>Diceware</strong></span>
           <div class='optional'>
@@ -212,6 +215,7 @@
           <div class='checksum'><span id='diceware-check'></span></div>
         </div>
 
+        <!-- EFF -->
         <div id='eff-default' class='cell'>
           <span class='cell-title'><strong>EFF</strong></span>
           <div class='optional'>
@@ -252,6 +256,7 @@
           <div class='checksum'><span id='eff-check'></span></div>
         </div>
 
+        <!-- Pseudowords -->
         <div id='pseudo-default' class='cell'>
           <span class='cell-title'><strong>Pseudowords</strong></span>
           <div class='optional'>
@@ -292,6 +297,7 @@
           <div class='checksum'><span id='pseudo-check'></span></div>
         </div>
 
+        <!--- Random -->
         <div id='random-default' class='cell'>
           <span class='cell-title'><strong>Random</strong></span>
           <div class='optional'>
@@ -312,6 +318,13 @@
                 <option>Base8</option>
                 <option>Base4</option>
                 <option>Base2</option>
+              </optgroup>
+              <optgroup label='Keyboard Walk'>
+                <option>Colemak</option>
+                <option>Dvorak</option>
+                <option>Norman</option>
+                <option>QWERTY</option>
+                <option>Workman</option>
               </optgroup>
               <optgroup label='Unicode'>
                 <option>Emoji</option>
@@ -356,7 +369,7 @@
           <a href='https://github.com/atoponce/webpassgen/releases/latest'><img alt='Download icon' title='Download latest release' src='assets/download.png' /></a>
           <a href='https://twitter.com/AaronToponce'><img alt='Twitter logo' title='Meet the author' src='assets/twitter.png' /></a>
         </p>
-        <p id='version'>Version: 20231024</p>
+        <p id='version'>Version: 20260623</p>
       </div>
     </div>
     <div id='overlay' onclick='document.getElementById("overlay").style.display="none";'>
@@ -395,7 +408,6 @@
     <script src='lists/alternateObscure.js'></script>
     <script src='lists/alternatePgp.js'></script>
     <script src='lists/alternatePokerware.js'></script>
-    <script src='lists/alternateRockyou.js'></script>
     <script src='lists/alternateShavian.js'></script>
     <script src='lists/alternateSimpsons.js'></script>
     <script src='lists/alternateSkey.js'></script>
@@ -404,6 +416,7 @@
     <script src='lists/alternateUK.js'></script>
     <script src='lists/alternateVAN.js'></script>
     <script src='lists/alternateWordle.js'></script>
+    <script src='lists/alternateZxcvbn.js'></script>
 
     <!-- cryptocurrency passphrase generator -->
     <script src='lists/bitcoinCNSimp.js'></script>
@@ -478,6 +491,7 @@
 
     <!-- emoji - on its own -->
     <script src='lists/randomEmoji.js'></script>
+    <script src='lists/randomWalk.js'></script>
 
     <script>
       "use strict"
