@@ -22,12 +22,10 @@ function init() {
 
   let cipherChoice = document.getElementById("cipher").value
 
-  if (cipherChoice === "chacha") {
-    CIPHER = new ChaCha()
+  if (cipherChoice === "keccak") {
+    CIPHER = new Keccak()
   } else if (cipherChoice === "spritz") {
     CIPHER = new Spritz()
-  } else if (cipherChoice === "trivium") {
-    CIPHER = new Trivium()
   }
 
   // If a seed is saved from the last session size, absorb the seed and credit
@@ -53,6 +51,26 @@ function init() {
 
   // Absorb the browser fingerprint
   CIPHER.absorb(fpBytes)
+
+  // Absorb client timestamps
+  const now = Date.now()
+  const perf = performance.now() >>> 0
+  const high = Math.trunc(now / 0x1_0000_0000) // Upper 32-bits
+  const low = (now & 0xffffffff) >>> 0  // Lower 32-bits
+
+  // Date.now() in milliseconds since Jan 1, 1970 00:00:00 is 48-bits long.
+  const nowBytes = [
+     (high >>  8) & 0xff, high & 0xff,
+     (low >> 24) & 0xff, (low >> 16) & 0xff, (low >>  8) & 0xff, low & 0xff,
+  ]
+
+  // That leaves 32-bits for performance.now(), or about 49.71 days of uptime.
+  const perfBytes = [
+    (perf >> 24) & 0xff, (perf >> 16) & 0xff, (perf >> 8) & 0xff, perf & 0xff
+  ]
+
+  CIPHER.absorb(nowBytes)
+  CIPHER.absorb(perfBytes)
 
   // Generate some random but difficult-to-type and generally long text for
   // the user. From the Scripps Spelling Bee word list.
